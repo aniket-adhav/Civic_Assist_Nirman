@@ -6,54 +6,86 @@ import { api } from '../lib/api';
 
 function AnimatedHero() {
   return (
-    <div className="flex flex-col items-start gap-5">
-      <div className="flex flex-col items-start gap-1">
-        <h1
-          className="uppercase leading-none whitespace-nowrap"
+    <div className="flex flex-col items-start gap-6">
+      <div className="flex flex-col items-start gap-2">
+        <p
           style={{
-            fontFamily: "'Impact', 'Arial Narrow', sans-serif",
-            fontWeight: 'normal',
-            fontSize: 'clamp(1.6rem, 4vw, 2.8rem)',
-            letterSpacing: '0.01em',
-            background: 'linear-gradient(160deg, #e0f2fe 0%, #bfdbfe 40%, #818cf8 100%)',
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontWeight: 400,
+            fontStyle: 'italic',
+            fontSize: 'clamp(0.85rem, 1.5vw, 1rem)',
+            letterSpacing: '0.22em',
+            color: '#c9a462',
+            textTransform: 'uppercase',
+          }}
+        >
+          A civic revolution
+        </p>
+
+        <h1
+          style={{
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontWeight: 900,
+            fontSize: 'clamp(2.2rem, 4.5vw, 3.4rem)',
+            lineHeight: 1.08,
+            letterSpacing: '-0.01em',
+            background: 'linear-gradient(150deg, #f5e6c8 0%, #e8d5a3 35%, #c9a462 70%, #a07830 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
           }}
         >
-          CITIES NEED YOU.
+          Where Change<br />Begins.
         </h1>
 
-        <div className="leading-none overflow-hidden">
+        <div className="overflow-hidden mt-1">
           <RotatingText
-            texts={['YOUR REPORT.', 'YOUR VOICE.', 'YOUR IMPACT.', 'YOUR FUTURE.', 'YOUR CHANGE.']}
+            texts={['Speak your truth.', 'Shape the city.', 'Drive real change.', 'Build community.', 'Inspire action.']}
             splitBy="words"
             staggerFrom="first"
-            staggerDuration={0.07}
-            rotationInterval={2300}
-            transition={{ type: 'spring', damping: 18, stiffness: 250 }}
+            staggerDuration={0.06}
+            rotationInterval={2500}
+            transition={{ type: 'spring', damping: 20, stiffness: 240 }}
             initial={{ y: '110%', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '-110%', opacity: 0 }}
-            elementLevelClassName="hero-char-gradient"
             style={{
-              fontFamily: "'Montserrat', sans-serif",
-              fontWeight: 900,
-              fontSize: 'clamp(2.6rem, 5vw, 3.8rem)',
-              letterSpacing: '-0.02em',
-              lineHeight: 1,
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontWeight: 600,
+              fontStyle: 'italic',
+              fontSize: 'clamp(1.1rem, 2vw, 1.4rem)',
+              letterSpacing: '0.01em',
+              lineHeight: 1.3,
+              color: '#d4b896',
             }}
           />
         </div>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <p className="text-slate-300 text-base font-semibold leading-snug max-w-xs">
-          Turning citizen reports into real civic progress.
+      <div className="flex flex-col gap-1.5">
+        <p style={{
+          fontFamily: "'Space Grotesk', sans-serif",
+          fontSize: 'clamp(0.85rem, 1.4vw, 0.95rem)',
+          fontWeight: 400,
+          lineHeight: 1.65,
+          color: '#a89070',
+          maxWidth: '26rem',
+        }}>
+          Every complaint you raise becomes a catalyst for civic transformation. Your voice is the most powerful tool your city has.
         </p>
-        <p className="text-slate-500 text-xs font-medium tracking-[0.18em] uppercase">
-          Report · Track · Transform
-        </p>
+        <div className="flex items-center gap-2 mt-1">
+          <div style={{ width: 24, height: 1, background: 'linear-gradient(90deg, #c9a462, transparent)' }} />
+          <p style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: '0.65rem',
+            fontWeight: 600,
+            letterSpacing: '0.25em',
+            textTransform: 'uppercase',
+            color: '#7a6040',
+          }}>
+            Speak · Witness · Inspire
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -161,37 +193,52 @@ export default function LoginPage() {
   };
 
   const features = [
-    { icon: 'fa-map-location-dot', title: 'Report Issues', desc: 'Pin civic problems on the map' },
-    { icon: 'fa-chart-line', title: 'Track Progress', desc: 'Follow complaints in real time' },
-    { icon: 'fa-people-group', title: 'Community Voice', desc: 'Upvote and support local issues' },
+    { icon: 'fa-map-location-dot', title: 'Report with Precision', desc: 'Pin civic concerns directly on the city map' },
+    { icon: 'fa-chart-line', title: 'Track in Real Time', desc: 'Follow your complaint from filed to resolved' },
+    { icon: 'fa-people-group', title: 'Amplify Together', desc: 'Rally neighbors to elevate urgent issues' },
   ];
 
   return (
     <div className="h-screen flex overflow-hidden">
-      <div className="hidden lg:flex w-[45%] flex-col bg-gradient-to-b from-[#0f172a] to-[#1e3a5f] relative overflow-hidden">
+      <div className="hidden lg:flex w-[45%] flex-col relative overflow-hidden"
+        style={{ background: 'linear-gradient(160deg, #0d0a18 0%, #1a1130 45%, #110d22 100%)' }}>
+
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent" />
-          <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-blue-600/10 blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-indigo-600/10 blur-3xl" />
-          <div className="absolute inset-0 opacity-[0.03]"
-            style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,164,98,0.4), transparent)' }} />
+          <div className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(201,164,98,0.07) 0%, transparent 70%)' }} />
+          <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(160,80,200,0.07) 0%, transparent 70%)' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(100,60,160,0.05) 0%, transparent 70%)' }} />
+          <div className="absolute inset-0 opacity-[0.025]"
+            style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #c9a462 1px, transparent 0)', backgroundSize: '28px 28px' }} />
+          <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(201,164,98,0.15), transparent)' }} />
         </div>
 
         <div className="relative z-10 px-10 pt-8">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%)' }}>
-              <i className="fas fa-city text-white text-base" />
+            <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg, #c9a462 0%, #a07830 100%)', boxShadow: '0 4px 16px rgba(201,164,98,0.25)' }}>
+              <i className="fas fa-landmark text-[#0d0a18] text-base" />
             </div>
             <div>
-              <div className="text-xl tracking-tight" style={{
-                fontFamily: "'Ancola', sans-serif", fontWeight: 600,
-                background: 'linear-gradient(90deg, #60a5fa 0%, #38bdf8 50%, #a5f3fc 100%)',
+              <div style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontWeight: 700,
+                fontSize: '1.2rem',
+                letterSpacing: '-0.01em',
+                background: 'linear-gradient(90deg, #f5e6c8 0%, #c9a462 100%)',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
               }}>
                 CivicAssist
               </div>
-              <div className="text-sky-400/60 text-[9px] font-bold tracking-[4px] uppercase mt-0.5">Citizen Intelligence</div>
+              <div style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: '0.6rem',
+                fontWeight: 600,
+                letterSpacing: '0.3em',
+                textTransform: 'uppercase',
+                color: 'rgba(201,164,98,0.45)',
+                marginTop: '1px',
+              }}>For The People</div>
             </div>
           </div>
         </div>
@@ -199,31 +246,65 @@ export default function LoginPage() {
         <div className="relative z-10 flex-1 flex flex-col justify-between pt-8 px-10 xl:px-12 pb-8">
           <div>
             <AnimatedHero />
-            <div className="mt-6 space-y-2">
+
+            <div className="mt-7" style={{ height: '1px', background: 'linear-gradient(90deg, rgba(201,164,98,0.25), transparent)' }} />
+
+            <div className="mt-6 space-y-2.5">
               {features.map(f => (
-                <div key={f.title} className="flex items-center gap-4 px-4 py-2.5 rounded-2xl border transition-colors"
-                  style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.07)' }}>
+                <div key={f.title} className="flex items-center gap-4 px-4 py-3 rounded-2xl transition-colors"
+                  style={{ background: 'rgba(201,164,98,0.04)', border: '1px solid rgba(201,164,98,0.1)' }}>
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'rgba(99,179,237,0.12)', border: '1px solid rgba(99,179,237,0.18)' }}>
-                    <i className={`fas ${f.icon} text-blue-400 text-sm`} />
+                    style={{ background: 'rgba(201,164,98,0.1)', border: '1px solid rgba(201,164,98,0.18)' }}>
+                    <i className={`fas ${f.icon} text-sm`} style={{ color: '#c9a462' }} />
                   </div>
                   <div>
-                    <div className="text-white text-sm font-semibold">{f.title}</div>
-                    <div className="text-slate-400 text-xs mt-0.5">{f.desc}</div>
+                    <div style={{
+                      fontFamily: "'Playfair Display', Georgia, serif",
+                      fontWeight: 600,
+                      fontSize: '0.88rem',
+                      color: '#e8d5a3',
+                    }}>{f.title}</div>
+                    <div style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontSize: '0.72rem',
+                      color: 'rgba(168,144,112,0.8)',
+                      marginTop: '1px',
+                    }}>{f.desc}</div>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="mt-6 flex items-center gap-8">
+
+            <div className="mt-6 flex items-start gap-8">
               {[['5K+', 'Issues Resolved'], ['12K+', 'Active Citizens'], ['98%', 'Satisfaction']].map(([val, lbl]) => (
                 <div key={lbl}>
-                  <div className="text-2xl font-black text-white">{val}</div>
-                  <div className="text-[10px] text-slate-400 font-medium mt-0.5 tracking-wide uppercase">{lbl}</div>
+                  <div style={{
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                    fontWeight: 900,
+                    fontSize: '1.6rem',
+                    background: 'linear-gradient(135deg, #f5e6c8 0%, #c9a462 100%)',
+                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                  }}>{val}</div>
+                  <div style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontSize: '0.6rem',
+                    fontWeight: 600,
+                    color: 'rgba(122,96,64,0.9)',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    marginTop: '2px',
+                  }}>{lbl}</div>
                 </div>
               ))}
             </div>
           </div>
-          <p className="text-slate-600 text-xs">© 2026 CivicAssist · Powered by Citizen Participation</p>
+
+          <p style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: '0.68rem',
+            color: 'rgba(122,96,64,0.5)',
+            letterSpacing: '0.05em',
+          }}>© 2026 CivicAssist · Powered by Citizen Participation</p>
         </div>
       </div>
 
