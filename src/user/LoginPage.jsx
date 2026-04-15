@@ -57,14 +57,14 @@ function AnimatedHero() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1.5">
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
-          fontSize: '0.82rem',
+          fontSize: '0.9rem',
           fontWeight: 400,
           lineHeight: 1.6,
           color: '#64748b',
-          maxWidth: '22rem',
+          maxWidth: '24rem',
         }}>
           Every report you file becomes a step toward a better city. Join thousands making real civic impact.
         </p>
@@ -72,11 +72,11 @@ function AnimatedHero() {
           <div style={{ width: 20, height: 1, background: 'linear-gradient(90deg, #14b8a6, transparent)' }} />
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: '0.62rem',
+            fontSize: '0.67rem',
             fontWeight: 600,
-            letterSpacing: '0.22em',
+            letterSpacing: '0.2em',
             textTransform: 'uppercase',
-            color: '#1d4ed8',
+            color: '#3b82f6',
           }}>
             Report · Track · Resolve
           </p>
@@ -242,8 +242,8 @@ export default function LoginPage() {
         </div>
 
         {/* Main content */}
-        <div className="relative z-10 flex-1 flex flex-col justify-between pt-6 px-9 pb-6">
-          <div className="flex flex-col gap-5">
+        <div className="relative z-10 flex-1 flex flex-col justify-between pt-5 px-9 pb-6">
+          <div className="flex flex-col gap-3.5">
             <AnimatedHero />
 
             {/* Divider */}
@@ -262,12 +262,12 @@ export default function LoginPage() {
                     <div style={{
                       fontFamily: "'DM Sans', sans-serif",
                       fontWeight: 600,
-                      fontSize: '0.8rem',
+                      fontSize: '0.85rem',
                       color: '#cbd5e1',
                     }}>{f.title}</div>
                     <div style={{
                       fontFamily: "'DM Sans', sans-serif",
-                      fontSize: '0.68rem',
+                      fontSize: '0.73rem',
                       fontWeight: 400,
                       color: '#475569',
                       marginTop: '1px',
@@ -278,7 +278,7 @@ export default function LoginPage() {
             </div>
 
             {/* Stats */}
-            <div className="flex items-start gap-6 pt-1">
+            <div className="flex items-start gap-6">
               {[['5K+', 'Issues Resolved'], ['12K+', 'Active Citizens'], ['98%', 'Satisfaction']].map(([val, lbl]) => (
                 <div key={lbl}>
                   <div style={{
