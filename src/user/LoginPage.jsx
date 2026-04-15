@@ -22,18 +22,19 @@ function AnimatedHero() {
         <h1 style={{
           fontFamily: "'Bebas Neue', sans-serif",
           fontWeight: 400,
-          fontSize: 'clamp(2.4rem, 4.2vw, 3.2rem)',
+          fontSize: 'clamp(2.6rem, 4.5vw, 3.4rem)',
           lineHeight: 1,
-          letterSpacing: '0.03em',
+          letterSpacing: '0.04em',
+          whiteSpace: 'nowrap',
           background: 'linear-gradient(135deg, #e2e8f0 0%, #93c5fd 45%, #60a5fa 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
         }}>
-          Your City.<br />Your Voice.
+          Your City. Your Voice.
         </h1>
 
-        <div className="overflow-hidden">
+        <div className="overflow-hidden mt-0.5">
           <RotatingText
             texts={['Make it heard.', 'Drive change.', 'Build tomorrow.', 'Shape progress.', 'Act now.']}
             splitBy="words"
@@ -46,8 +47,8 @@ function AnimatedHero() {
             exit={{ y: '-110%', opacity: 0 }}
             style={{
               fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 600,
-              fontSize: 'clamp(0.95rem, 1.6vw, 1.1rem)',
+              fontWeight: 700,
+              fontSize: 'clamp(1.15rem, 2vw, 1.35rem)',
               letterSpacing: '0.01em',
               lineHeight: 1.3,
               color: '#14b8a6',
@@ -216,11 +217,11 @@ export default function LoginPage() {
             </div>
             <div>
               <div style={{
-                fontFamily: "'Grouns', sans-serif",
-                fontWeight: 400,
-                fontSize: '1.45rem',
-                letterSpacing: '0.06em',
-                background: 'linear-gradient(90deg, #93c5fd 0%, #60a5fa 50%, #38bdf8 100%)',
+                fontFamily: "'Sora', sans-serif",
+                fontWeight: 700,
+                fontSize: '1.3rem',
+                letterSpacing: '-0.01em',
+                background: 'linear-gradient(90deg, #93c5fd 0%, #60a5fa 60%, #38bdf8 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
