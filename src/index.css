@@ -2,6 +2,14 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 
 @font-face {
+  font-family: 'Grouns';
+  src: url('/Grouns.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Impact';
   src: url('/fonts/impact.ttf') format('truetype');
   font-weight: normal;
