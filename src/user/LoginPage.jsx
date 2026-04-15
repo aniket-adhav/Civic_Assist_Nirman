@@ -7,7 +7,7 @@ import { api } from '../lib/api';
 function AnimatedHero() {
   return (
     <div className="flex flex-col items-start gap-1.5">
-      <div className="flex flex-col items-start gap-2">
+      <div className="flex flex-col items-start gap-1.5">
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
           fontWeight: 500,
@@ -34,7 +34,7 @@ function AnimatedHero() {
           Your City. Your Voice.
         </h1>
 
-        <div className="overflow-hidden mt-1">
+        <div className="overflow-hidden">
           <RotatingText
             texts={['Make it heard.', 'Drive change.', 'Build tomorrow.', 'Shape progress.', 'Act now.']}
             splitBy="words"
