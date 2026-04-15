@@ -41,7 +41,7 @@ function AnimatedHero() {
             margin: 0,
             padding: 0,
           }}>
-            Your City. Your Voice.
+            YOUR CITY. YOUR VOICE.
           </h1>
         </div>
 
@@ -207,7 +207,7 @@ export default function LoginPage() {
   return (
     <div className="h-screen flex overflow-hidden">
       <div className="hidden lg:flex w-[45%] flex-col relative overflow-hidden"
-        style={{ background: 'linear-gradient(160deg, #050c1a 0%, #071628 55%, #030a15 100%)' }}>
+        style={{ background: 'linear-gradient(160deg, #0d1f3c 0%, #112244 40%, #0a2a4a 70%, #0f2d50 100%)' }}>
 
         {/* Background effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
