@@ -242,7 +242,7 @@ export default function LoginPage() {
         </div>
 
         {/* Main content */}
-        <div className="relative z-10 flex-1 flex flex-col justify-between pt-5 px-9 pb-6">
+        <div className="relative z-10 flex-1 flex flex-col pt-5 px-9 pb-6">
           <div className="flex flex-col gap-3.5">
             <AnimatedHero />
 
@@ -311,6 +311,7 @@ export default function LoginPage() {
             fontSize: '0.65rem',
             color: '#1e3a5f',
             letterSpacing: '0.04em',
+            marginTop: 'auto',
           }}>© 2026 CivicAssist · Powered by Citizen Participation</p>
         </div>
       </div>
