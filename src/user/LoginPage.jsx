@@ -6,7 +6,7 @@ import { api } from '../lib/api';
 
 function AnimatedHero() {
   return (
-    <div className="flex flex-col items-start gap-3">
+    <div className="flex flex-col items-start gap-1.5">
       <div className="flex flex-col items-start gap-2">
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
@@ -48,7 +48,7 @@ function AnimatedHero() {
             style={{
               fontFamily: "'DM Sans', sans-serif",
               fontWeight: 700,
-              fontSize: 'clamp(1.3rem, 2.2vw, 1.55rem)',
+              fontSize: 'clamp(1.45rem, 2.5vw, 1.7rem)',
               letterSpacing: '0.01em',
               lineHeight: 1.3,
               color: '#14b8a6',
