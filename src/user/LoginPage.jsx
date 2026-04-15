@@ -19,20 +19,31 @@ function AnimatedHero() {
           Civic Intelligence Platform
         </p>
 
-        <h1 style={{
-          fontFamily: "'Docade', sans-serif",
-          fontWeight: 400,
-          fontSize: 'clamp(2rem, 3.6vw, 2.9rem)',
-          lineHeight: 1.05,
-          letterSpacing: '0.02em',
-          whiteSpace: 'nowrap',
-          background: 'linear-gradient(135deg, #e2e8f0 0%, #93c5fd 45%, #60a5fa 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
+        <div style={{
+          display: 'inline-block',
+          background: 'linear-gradient(120deg, rgba(255,255,255,0.06) 0%, rgba(147,197,253,0.10) 50%, rgba(96,165,250,0.07) 100%)',
+          borderRadius: '10px',
+          padding: '6px 16px 6px 12px',
+          border: '1px solid rgba(147,197,253,0.12)',
         }}>
-          Your City. Your Voice.
-        </h1>
+          <h1 style={{
+            fontFamily: "'Boldonse', cursive",
+            fontWeight: 400,
+            fontSize: 'clamp(1.75rem, 3.2vw, 2.6rem)',
+            lineHeight: 1,
+            letterSpacing: '0.01em',
+            whiteSpace: 'nowrap',
+            display: 'flex',
+            alignItems: 'center',
+            background: 'linear-gradient(135deg, #e2e8f0 0%, #93c5fd 45%, #60a5fa 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            margin: 0,
+          }}>
+            Your City. Your Voice.
+          </h1>
+        </div>
 
         <div className="overflow-hidden">
           <RotatingText
