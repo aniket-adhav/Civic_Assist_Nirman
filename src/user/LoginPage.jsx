@@ -23,14 +23,15 @@ function AnimatedHero() {
           display: 'inline-block',
           background: 'linear-gradient(120deg, rgba(255,255,255,0.06) 0%, rgba(147,197,253,0.10) 50%, rgba(96,165,250,0.07) 100%)',
           borderRadius: '10px',
-          padding: '8px 18px 10px 14px',
+          padding: '5px 18px 9px 14px',
           border: '1px solid rgba(147,197,253,0.12)',
+          overflow: 'hidden',
         }}>
           <h1 style={{
             fontFamily: "'Boldonse', cursive",
             fontWeight: 400,
             fontSize: 'clamp(1.45rem, 2.6vw, 2.1rem)',
-            lineHeight: 1.15,
+            lineHeight: 1,
             letterSpacing: '0.01em',
             whiteSpace: 'nowrap',
             display: 'block',
@@ -39,7 +40,7 @@ function AnimatedHero() {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
             margin: 0,
-            padding: 0,
+            padding: '0.1em 0 0 0',
           }}>
             YOUR CITY. YOUR VOICE.
           </h1>
@@ -74,7 +75,7 @@ function AnimatedHero() {
           fontSize: '0.95rem',
           fontWeight: 400,
           lineHeight: 1.65,
-          color: '#64748b',
+          color: 'rgba(255,255,255,0.72)',
           maxWidth: '26rem',
         }}>
           Every report you file becomes a step toward a better city. Join thousands making real civic impact.
@@ -87,7 +88,7 @@ function AnimatedHero() {
             fontWeight: 600,
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
-            color: '#3b82f6',
+            color: 'rgba(255,255,255,0.5)',
           }}>
             Report · Track · Resolve
           </p>
@@ -207,7 +208,7 @@ export default function LoginPage() {
   return (
     <div className="h-screen flex overflow-hidden">
       <div className="hidden lg:flex w-[45%] flex-col relative overflow-hidden"
-        style={{ background: 'linear-gradient(160deg, #0d1f3c 0%, #112244 40%, #0a2a4a 70%, #0f2d50 100%)' }}>
+        style={{ background: 'linear-gradient(160deg, #0c1628 0%, #0e1e35 35%, #101f38 65%, #0d1b30 100%)' }}>
 
         {/* Background effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -274,13 +275,13 @@ export default function LoginPage() {
                       fontFamily: "'DM Sans', sans-serif",
                       fontWeight: 600,
                       fontSize: '0.83rem',
-                      color: '#cbd5e1',
+                      color: '#ffffff',
                     }}>{f.title}</div>
                     <div style={{
                       fontFamily: "'DM Sans', sans-serif",
                       fontSize: '0.71rem',
                       fontWeight: 400,
-                      color: '#475569',
+                      color: 'rgba(255,255,255,0.5)',
                       marginTop: '1px',
                     }}>{f.desc}</div>
                   </div>
@@ -307,7 +308,7 @@ export default function LoginPage() {
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: '0.6rem',
                     fontWeight: 600,
-                    color: '#334155',
+                    color: 'rgba(255,255,255,0.5)',
                     letterSpacing: '0.14em',
                     textTransform: 'uppercase',
                     marginTop: '3px',
@@ -320,7 +321,7 @@ export default function LoginPage() {
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
             fontSize: '0.65rem',
-            color: '#1e3a5f',
+            color: 'rgba(255,255,255,0.3)',
             letterSpacing: '0.04em',
             marginTop: 'auto',
           }}>© 2026 CivicAssist · Powered by Citizen Participation</p>
