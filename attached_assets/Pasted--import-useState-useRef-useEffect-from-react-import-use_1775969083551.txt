@@ -1,0 +1,289 @@
+//import { useState, useRef, useEffect } from 'react';
+// import { useApp } from '../context/AppContext';
+
+// export default function LoginPage() {
+//   const { sendOtp, verifyOtp, navigateTo } = useApp();
+//   const [step, setStep] = useState('phone');
+//   const [phone, setPhone] = useState('');
+//   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState('');
+//   const [resendTimer, setResendTimer] = useState(0);
+//   const otpRefs = useRef([]);
+
+//   useEffect(() => {
+//     if (resendTimer > 0) {
+//       const t = setTimeout(() => setResendTimer(v => v - 1), 1000);
+//       return () => clearTimeout(t);
+//     }
+//   }, [resendTimer]);
+
+//   const handleSendOtp = async () => {
+//     if (phone.length < 10) { setError('Please enter a valid 10-digit number'); return; }
+//     setError(''); setLoading(true);
+//     await sendOtp(phone);
+//     setLoading(false); setStep('otp'); setResendTimer(30);
+//     setTimeout(() => otpRefs.current[0]?.focus(), 100);
+//   };
+
+//   const handleOtpChange = (index, value) => {
+//     const cleaned = value.replace(/\D/g, '').slice(-1);
+//     const newOtp = [...otp];
+//     newOtp[index] = cleaned;
+//     setOtp(newOtp);
+//     setError('');
+//     if (cleaned && index < 5) otpRefs.current[index + 1]?.focus();
+//     if (newOtp.every(d => d !== '') && newOtp.join('').length === 6) {
+//       setTimeout(() => handleVerifyOtp(newOtp.join('')), 100);
+//     }
+//   };
+
+//   const handleOtpKeyDown = (index, e) => {
+//     if (e.key === 'Backspace' && !otp[index] && index > 0) otpRefs.current[index - 1]?.focus();
+//   };
+
+//   const handleVerifyOtp = async (otpVal) => {
+//     const code = otpVal || otp.join('');
+//     if (code.length < 6) { setError('Please enter the complete 6-digit OTP'); return; }
+//     setError(''); setLoading(true);
+//     const result = await verifyOtp(phone, code);
+//     setLoading(false);
+//     if (!result.success) {
+//       setError('Invalid OTP. Please try again.');
+//       setOtp(['', '', '', '', '', '']);
+//       otpRefs.current[0]?.focus();
+//     }
+//   };
+
+//   const handleResend = async () => {
+//     if (resendTimer > 0) return;
+//     setOtp(['', '', '', '', '', '']); setError(''); setLoading(true);
+//     await sendOtp(phone);
+//     setLoading(false); setResendTimer(30);
+//   };
+
+//   const features = [
+//     { icon: 'fa-map-location-dot', title: 'Report Issues', desc: 'Pin problems on the map instantly' },
+//     { icon: 'fa-chart-line', title: 'Track Progress', desc: 'Follow your complaints in real time' },
+//     { icon: 'fa-people-group', title: 'Community', desc: 'Upvote and support local issues' },
+//   ];
+
+//   return (
+//     <div className="min-h-screen flex bg-white">
+//       <div className="hidden lg:flex w-[45%] flex-col bg-gradient-to-b from-[#0f172a] to-[#1e3a5f] relative overflow-hidden">
+//         <div className="absolute inset-0 overflow-hidden pointer-events-none">
+//           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent" />
+//           <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-blue-600/10 blur-3xl" />
+//           <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-indigo-600/10 blur-3xl" />
+//           <div className="absolute inset-0 opacity-[0.03]"
+//             style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}
+//           />
+//         </div>
+
+//         <div className="relative z-10 p-10">
+//           <div className="flex items-center gap-3">
+//             <div className="w-10 h-10 rounded-2xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center">
+//               <i className="fas fa-city text-blue-300 text-base" />
+//             </div>
+//             <div>
+//               <div className="text-white font-black text-lg">CivicAssist</div>
+//               <div className="text-blue-300/70 text-[10px] font-bold tracking-widest uppercase">Citizen Portal</div>
+//             </div>
+//           </div>
+//         </div>
+
+//         <div className="relative z-10 flex-1 flex flex-col justify-center px-12">
+//           <div className="mb-10">
+//             <h1 className="text-4xl font-black text-white leading-tight mb-3">
+//               Better Communities,<br />
+//               <span className="text-blue-400">One Report at a Time.</span>
+//             </h1>
+//             <p className="text-slate-400 text-sm leading-relaxed">
+//               Join thousands of citizens making their neighbourhoods better through transparent, accountable civic action.
+//             </p>
+//           </div>
+
+//           <div className="space-y-4">
+//             {features.map(f => (
+//               <div key={f.title} className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/[0.07] hover:bg-white/[0.08] transition-colors">
+//                 <div className="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-400/20 flex items-center justify-center flex-shrink-0">
+//                   <i className={`fas ${f.icon} text-blue-400 text-sm`} />
+//                 </div>
+//                 <div>
+//                   <div className="text-white text-sm font-bold">{f.title}</div>
+//                   <div className="text-slate-400 text-xs mt-0.5">{f.desc}</div>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+
+//           <div className="mt-8 flex items-center gap-6">
+//             {[['5K+', 'Issues Resolved'], ['12K+', 'Active Citizens'], ['98%', 'Satisfaction']].map(([val, lbl]) => (
+//               <div key={lbl}>
+//                 <div className="text-2xl font-black text-white">{val}</div>
+//                 <div className="text-[10px] text-slate-400 font-semibold">{lbl}</div>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+
+//         <div className="relative z-10 p-10">
+//           <div className="text-slate-500 text-xs">© 2026 CivicAssist · Powered by Citizen Participation</div>
+//         </div>
+//       </div>
+
+//       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+//         <div className="w-full max-w-[360px]">
+//           <div className="lg:hidden flex items-center gap-2 mb-8">
+//             <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center">
+//               <i className="fas fa-city text-white text-sm" />
+//             </div>
+//             <span className="font-black text-slate-900">CivicAssist</span>
+//           </div>
+
+//           {step === 'phone' ? (
+//             <div className="animate-fadeIn">
+//               <div className="mb-8">
+//                 <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-5">
+//                   <i className="fas fa-mobile-screen text-blue-600 text-xl" />
+//                 </div>
+//                 <h2 className="text-2xl font-black text-slate-900">Sign in</h2>
+//                 <p className="text-slate-400 text-sm mt-1">Enter your mobile number to get started.</p>
+//               </div>
+
+//               <div className="space-y-4">
+//                 <div>
+//                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Mobile Number</label>
+//                   <div className="flex items-center border border-slate-200 rounded-xl bg-slate-50 focus-within:border-blue-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-50 transition-all overflow-hidden">
+//                     <div className="flex items-center gap-2 pl-4 pr-3 border-r border-slate-200 py-3.5">
+//                       <span className="text-slate-400 text-sm font-bold">🇮🇳</span>
+//                       <span className="text-slate-500 text-sm font-bold">+91</span>
+//                     </div>
+//                     <input
+//                       type="tel"
+//                       placeholder="9876543210"
+//                       value={phone}
+//                       onChange={e => { setPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); setError(''); }}
+//                       onKeyDown={e => e.key === 'Enter' && handleSendOtp()}
+//                       maxLength={10}
+//                       autoFocus
+//                       className="flex-1 px-4 py-3.5 text-slate-900 text-sm font-semibold bg-transparent outline-none placeholder:text-slate-300 placeholder:font-normal"
+//                     />
+//                     {phone.length === 10 && (
+//                       <span className="pr-4 text-green-500">
+//                         <i className="fas fa-circle-check text-sm" />
+//                       </span>
+//                     )}
+//                   </div>
+//                 </div>
+
+//                 {error && (
+//                   <div className="flex items-center gap-2 px-3.5 py-3 bg-red-50 border border-red-200 rounded-xl">
+//                     <i className="fas fa-circle-exclamation text-red-500 text-sm" />
+//                     <span className="text-red-600 text-sm">{error}</span>
+//                   </div>
+//                 )}
+
+//                 <button
+//                   onClick={handleSendOtp}
+//                   disabled={loading || phone.length < 10}
+//                   className="w-full py-3.5 rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] shadow-lg shadow-blue-200 hover:shadow-blue-300 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+//                 >
+//                   {loading ? (
+//                     <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Sending OTP...</>
+//                   ) : (
+//                     <>Continue <i className="fas fa-arrow-right text-xs" /></>
+//                   )}
+//                 </button>
+
+//                 <p className="text-center text-xs text-slate-400">
+//                   By continuing you agree to our{' '}
+//                   <button className="text-blue-500 font-semibold hover:underline">Terms of Service</button>
+//                 </p>
+//               </div>
+
+//               <div className="mt-8 pt-6 border-t border-slate-100">
+//                 <p className="text-center text-xs text-slate-400 mb-3">Are you a government official?</p>
+//                 <button
+//                   onClick={() => navigateTo('adminLogin')}
+//                   className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all"
+//                 >
+//                   <i className="fas fa-shield-halved text-sm" />
+//                   Access Admin Portal
+//                 </button>
+//               </div>
+//             </div>
+//           ) : (
+//             <div className="animate-fadeIn">
+//               <button
+//                 onClick={() => { setStep('phone'); setOtp(['', '', '', '', '', '']); setError(''); }}
+//                 className="flex items-center gap-2 text-slate-400 text-sm font-semibold mb-8 hover:text-slate-700 transition-colors"
+//               >
+//                 <i className="fas fa-arrow-left text-xs" /> Back
+//               </button>
+
+//               <div className="mb-8">
+//                 <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-5">
+//                   <i className="fas fa-message text-blue-600 text-xl" />
+//                 </div>
+//                 <h2 className="text-2xl font-black text-slate-900">Verify OTP</h2>
+//                 <p className="text-slate-400 text-sm mt-1">
+//                   Code sent to <strong className="text-slate-700">+91 {phone}</strong>
+//                 </p>
+//               </div>
+
+//               <div className="flex gap-2.5 justify-between mb-5">
+//                 {otp.map((digit, i) => (
+//                   <input
+//                     key={i}
+//                     ref={el => otpRefs.current[i] = el}
+//                     type="text"
+//                     inputMode="numeric"
+//                     maxLength={1}
+//                     value={digit}
+//                     onChange={e => handleOtpChange(i, e.target.value)}
+//                     onKeyDown={e => handleOtpKeyDown(i, e)}
+//                     className={`w-12 h-14 border-2 rounded-2xl text-center text-xl font-black outline-none transition-all ${
+//                       digit
+//                         ? 'border-blue-500 bg-blue-50 text-blue-700'
+//                         : 'border-slate-200 bg-slate-50 text-slate-900 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-50'
+//                     }`}
+//                   />
+//                 ))}
+//               </div>
+
+//               {error && (
+//                 <div className="flex items-center gap-2 px-3.5 py-3 bg-red-50 border border-red-200 rounded-xl mb-4">
+//                   <i className="fas fa-circle-exclamation text-red-500 text-sm" />
+//                   <span className="text-red-600 text-sm">{error}</span>
+//                 </div>
+//               )}
+
+//               <button
+//                 onClick={() => handleVerifyOtp()}
+//                 disabled={loading || otp.join('').length < 6}
+//                 className="w-full py-3.5 rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] shadow-lg shadow-blue-200 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+//               >
+//                 {loading ? (
+//                   <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Verifying...</>
+//                 ) : (
+//                   <>Verify & Sign In <i className="fas fa-arrow-right text-xs" /></>
+//                 )}
+//               </button>
+
+//               <div className="text-center mt-5">
+//                 {resendTimer > 0 ? (
+//                   <p className="text-slate-400 text-sm">Resend OTP in <strong className="text-slate-700">{resendTimer}s</strong></p>
+//                 ) : (
+//                   <button onClick={handleResend} className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">
+//                     <i className="fas fa-rotate-right mr-1.5" />Resend OTP
+//                   </button>
+//                 )}
+//               </div>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }

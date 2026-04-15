@@ -1,0 +1,111 @@
+function ScheduleSection() {
+  return (
+    <section id="schedule" className="py-24 relative overflow-hidden">
+      {/* Background Effects */}
+      {/* <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-500/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-500/10 blur-[120px] rounded-full" />
+      </div> */}
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 mb-6"
+            >
+              <Clock className="h-4 w-4 text-orange-500" />
+              <span className="text-xs text-orange-400 tracking-[0.3em] font-bold uppercase">
+                Stay Tuned
+              </span>
+            </motion.div>
+
+              <h2 className="font-display text-4xl md:text-6xl text-white mb-6 uppercase tracking-tight">
+                THE <span className="text-orange-500">BATTLE</span> PLAN
+              </h2>
+            
+            <p className="text-white/40 text-lg uppercase tracking-[0.2em] font-medium">
+              Coming Soon to Your Screen
+            </p>
+          </motion.div>
+
+          <motion.div 
+            whileHover={{ y: -8, scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="relative group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 via-transparent to-red-600/30 blur-3xl rounded-[2.5rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            
+          <div className="relative bg-white/5 backdrop-blur-md border border-white/10 rounded-[2.5rem] p-8 md:p-16 overflow-hidden shadow-2xl">
+              {/* Animated mesh background for card */}
+              <div className="absolute inset-0 opacity-10 pointer-events-none">
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#f97316_0%,transparent_50%)]" />
+              </div>
+
+              <div className="relative z-10 flex flex-col items-center text-center space-y-10">
+                <motion.div
+                  animate={{ 
+                    rotate: [0, 10, -10, 0],
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{ 
+                    duration: 5, 
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                  className="w-24 h-24 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-[0_0_50px_rgba(249,115,22,0.3)]"
+                >
+                  <Trophy className="w-12 h-12 text-white" />
+                </motion.div>
+                
+                <div className="space-y-6">
+                  <h3 className="text-3xl md:text-5xl font-bold text-white tracking-tight">
+                    Schedule is dropping <span className="text-orange-500">really soon!</span>
+                  </h3>
+                  
+                  <p className="text-white/50 text-base md:text-xl font-medium max-w-xl mx-auto leading-relaxed">
+                    We're locking in the times and picking the best spots for every match. Get your gear ready, the wait is almost over.
+                  </p>
+                  
+                  <div className="flex flex-wrap justify-center gap-3 pt-6">
+                    {[
+                      { icon: Zap, label: "Matches" },
+                      { icon: MapPin, label: "Venues" },
+                      { icon: Calendar, label: "Dates" }
+                    ].map((item, i) => (
+                      <motion.div
+                        key={item.label}
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-white/5 rounded-2xl border border-white/10 hover:border-orange-500/30 transition-colors"
+                      >
+                        <item.icon className="w-4 h-4 text-orange-500" />
+                        <span className="text-sm text-white/70 font-bold uppercase tracking-wider">{item.label}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-8">
+                  <div className="flex items-center gap-3 text-orange-500/40 font-black text-sm tracking-[0.5em] uppercase">
+                    <span className="animate-pulse">●</span>
+                    <span>Team Parakram</span>
+                    <span className="animate-pulse">●</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}

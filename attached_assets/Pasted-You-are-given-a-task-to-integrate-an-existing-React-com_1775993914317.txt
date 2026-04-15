@@ -1,0 +1,220 @@
+You are given a task to integrate an existing React component in the codebase
+
+The codebase should support:
+- shadcn project structure  
+- Tailwind CSS
+- Typescript
+
+If it doesn't, provide instructions on how to setup project via shadcn CLI, install Tailwind or Typescript.
+
+Determine the default path for components and styles. 
+If default path for components is not /components/ui, provide instructions on why it's important to create this folder
+Copy-paste this component to /components/ui folder:
+```tsx
+elite-plan-card.tsx
+"use client";
+
+import * as React from "react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+
+interface ElitePlanCardProps extends React.HTMLAttributes<HTMLDivElement> {
+  imageUrl: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  highlights?: string[]; // new section for extra text
+  onAction?: () => void;
+}
+
+export const ElitePlanCard = React.forwardRef<
+  HTMLDivElement,
+  ElitePlanCardProps
+>(
+  (
+    {
+      className,
+      imageUrl,
+      title,
+      subtitle,
+      description,
+      highlights = [],
+      onAction,
+      ...props
+    },
+    ref
+  ) => {
+    return (
+      <motion.div
+        ref={ref}
+        whileHover={{ scale: 1.02 }}
+        transition={{ type: "spring", stiffness: 250, damping: 20 }}
+        className={cn(
+          "relative w-full max-w-sm overflow-hidden rounded-3xl hover:shadow-xl bg-black",
+          className
+        )}
+        {...props}
+      >
+        {/* Top image with parallax */}
+        <motion.div
+          className="relative h-64 w-full overflow-hidden"
+          whileHover={{ scale: 1.1 }}
+          transition={{ duration: 0.45 }}
+        >
+          <img
+            src={imageUrl}
+            alt={title}
+            className="h-full w-full object-cover"
+          />
+          {/* Fade connection between image and black background */}
+          <div className="absolute bottom-0 h-32 w-full bg-gradient-to-t from-black via-black/80 to-transparent" />
+        </motion.div>
+
+        {/* Bottom content */}
+        <div className="relative z-10 p-6 bg-black text-white">
+          <p className="text-sm uppercase tracking-wider text-gray-400">
+            {subtitle}
+          </p>
+          <h3 className="mt-1 text-2xl font-bold">{title}</h3>
+          <p className="mt-3 text-sm leading-relaxed text-gray-300">
+            {description}
+          </p>
+
+          {/* Highlights */}
+          {highlights.length > 0 && (
+            <ul className="mt-4 grid grid-cols-2 gap-2 text-xs text-gray-400">
+              {highlights.map((item, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center gap-2 rounded-md bg-gray-800/50 px-2 py-1"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* CTA */}
+          {onAction && (
+            <div className="mt-6">
+              <Button
+                variant="default"
+                onClick={onAction}
+                className="w-full bg-white text-black hover:bg-gray-200"
+              >
+                Learn More
+              </Button>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
+);
+
+ElitePlanCard.displayName = "ElitePlanCard";
+
+
+demo.tsx
+"use client";
+
+import * as React from "react";
+import { ElitePlanCard } from "@/components/ui/elite-plan-card";
+
+export default function ProductShowcaseDemo() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background p-6">
+      <ElitePlanCard
+        imageUrl="https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/ruixen_moon.png"
+        title="Lunar Series"
+        subtitle="Ruixen Collection"
+        description="Experience the fusion of art and design with the Lunar Series. Minimalist, bold, and timeless."
+        onAction={() => alert("Learn more clicked!")}
+      />
+    </div>
+  );
+}
+
+```
+
+Copy-paste these files for dependencies:
+```tsx
+originui/button
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
+
+import { cn } from "@/lib/utils";
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-colors outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground shadow-sm shadow-black/5 hover:bg-primary/90",
+        destructive:
+          "bg-destructive text-destructive-foreground shadow-sm shadow-black/5 hover:bg-destructive/90",
+        outline:
+          "border border-input bg-background shadow-sm shadow-black/5 hover:bg-accent hover:text-accent-foreground",
+        secondary:
+          "bg-secondary text-secondary-foreground shadow-sm shadow-black/5 hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      size: {
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-lg px-3 text-xs",
+        lg: "h-10 rounded-lg px-8",
+        icon: "h-9 w-9",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  },
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
+    return (
+      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+    );
+  },
+);
+Button.displayName = "Button";
+
+export { Button, buttonVariants };
+
+```
+
+Install NPM dependencies:
+```bash
+framer-motion, @radix-ui/react-slot, class-variance-authority
+```
+
+Implementation Guidelines
+ 1. Analyze the component structure and identify all required dependencies
+ 2. Review the component's argumens and state
+ 3. Identify any required context providers or hooks and install them
+ 4. Questions to Ask
+ - What data/props will be passed to this component?
+ - Are there any specific state management requirements?
+ - Are there any required assets (images, icons, etc.)?
+ - What is the expected responsive behavior?
+ - What is the best place to use this component in the app?
+
+Steps to integrate
+ 0. Copy paste all the code above in the correct directories
+ 1. Install external dependencies
+ 2. Fill image assets with Unsplash stock images you know exist
+ 3. Use lucide-react icons for svgs or logos if component requires them

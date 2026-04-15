@@ -1,0 +1,358 @@
+import express from 'express';
+import Issue from '../models/Issue.js';
+import Officer from '../models/Officer.js';
+import { requireAdmin } from '../middleware/auth.js';
+import { runAIAnalysis } from '../services/aiRunner.js';
+
+const router = express.Router();
+
+const MUMBAI_ZONES = [
+  { name: 'Andheri', lat: 19.1364, lng: 72.8296 },
+  { name: 'Bandra', lat: 19.0607, lng: 72.8362 },
+  { name: 'Dadar', lat: 19.0270, lng: 72.8381 },
+  { name: 'Goregaon', lat: 19.1666, lng: 72.8506 },
+  { name: 'Powai', lat: 19.1187, lng: 72.9053 },
+  { name: 'Chembur', lat: 19.0600, lng: 72.8970 },
+  { name: 'Juhu', lat: 19.1075, lng: 72.8263 },
+  { name: 'Kurla', lat: 19.0726, lng: 72.8845 },
+  { name: 'Borivali', lat: 19.2290, lng: 72.8560 },
+  { name: 'Vashi', lat: 19.0696, lng: 72.9987 },
+];
+
+function timeAgo(date) {
+  const diff = (Date.now() - new Date(date).getTime()) / 1000;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function haversineKm(a, b) {
+  const R = 6371;
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+function bestZoneForIssue(issue) {
+  const lat = Number(issue?.coordinates?.lat);
+  const lng = Number(issue?.coordinates?.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+  let best = null;
+  for (const z of MUMBAI_ZONES) {
+    const d = haversineKm({ lat, lng }, z);
+    if (!best || d < best.distanceKm) best = { ...z, distanceKm: d };
+  }
+  // keep it conservative: only classify if it’s reasonably close to Mumbai zones
+  if (!best || best.distanceKm > 25) return null;
+  return best.name;
+}
+
+function getPriority(likes) {
+  if (likes >= 50) return 'High';
+  if (likes >= 20) return 'Medium';
+  return 'Low';
+}
+
+function adminStatusLabel(status) {
+  const map = { pending: 'Pending', inprogress: 'In Progress', resolved: 'Resolved' };
+  return map[status] || 'Pending';
+}
+
+function formatAdminIssue(issue) {
+  const likesCount = issue.supporters?.length || 0;
+  const authenticity = issue.aiAnalysis?.authenticity || 'unknown';
+  const aiBadge = authenticity === 'fake' ? 'Fake (Spam)' : authenticity === 'real' ? 'Real' : 'Unknown';
+  return {
+    id: issue.complaintId || `#${issue._id.toString().slice(-4).toUpperCase()}`,
+    _id: issue._id.toString(),
+    title: issue.title,
+    category: issue.category,
+    status: adminStatusLabel(issue.status),
+    date: timeAgo(issue.createdAt),
+    submittedAt: new Date(issue.createdAt).toLocaleString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true,
+    }),
+    priority: getPriority(likesCount),
+    reporter: issue.reporter?.name || 'Anonymous',
+    phone: issue.reporter?.phone || 'N/A',
+    location: issue.location,
+    image: issue.imageUrl || '',
+    description: issue.description,
+    assignedTo: issue.assignedTo || null,
+    timeline: issue.timeline || [],
+    likes: likesCount,
+    aiAnalysis: {
+      textScore: issue.aiAnalysis?.textScore ?? null,
+      imageScore: issue.aiAnalysis?.imageScore ?? null,
+      finalScore: issue.aiAnalysis?.finalScore ?? null,
+      authenticity,
+      isSpam: !!issue.aiAnalysis?.isSpam,
+      badge: aiBadge,
+    },
+  };
+}
+
+router.get('/issues', requireAdmin, async (req, res) => {
+  const issues = await Issue.find().sort({ createdAt: -1 });
+  res.json(issues.map(formatAdminIssue));
+});
+
+router.get('/stats', requireAdmin, async (req, res) => {
+  const total = await Issue.countDocuments();
+  const pending = await Issue.countDocuments({ status: 'pending' });
+  const inprogress = await Issue.countDocuments({ status: 'inprogress' });
+  const resolved = await Issue.countDocuments({ status: 'resolved' });
+  const fake = await Issue.countDocuments({ 'aiAnalysis.authenticity': 'fake' });
+  const real = await Issue.countDocuments({ 'aiAnalysis.authenticity': 'real' });
+  const unknown = Math.max(0, total - fake - real);
+  res.json({ total, pending, inprogress, resolved, fake, real, unknown });
+});
+
+router.patch('/issues/:id/status', requireAdmin, async (req, res) => {
+  const { status } = req.body;
+  const validStatuses = { Pending: 'pending', 'In Progress': 'inprogress', Resolved: 'resolved' };
+  const dbStatus = validStatuses[status];
+  if (!dbStatus) return res.status(400).json({ error: 'Invalid status' });
+
+  const now = new Date().toLocaleString('en-IN', {
+    hour: '2-digit', minute: '2-digit', hour12: true,
+    day: '2-digit', month: 'short',
+  });
+
+  const timelineEvent = {
+    time: now,
+    event: `Status changed to ${status}`,
+    icon: status === 'Resolved' ? 'fa-circle-check' : status === 'In Progress' ? 'fa-arrows-rotate' : 'fa-clock',
+    color: status === 'Resolved' ? '#059669' : status === 'In Progress' ? '#f59e0b' : '#64748b',
+  };
+
+  const existing = await Issue.findById(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'Issue not found' });
+  if (existing.aiAnalysis?.isSpam) {
+    return res.status(400).json({ error: 'Spam complaint status cannot be changed' });
+  }
+  const issue = await Issue.findByIdAndUpdate(
+    req.params.id,
+    { status: dbStatus, $push: { timeline: timelineEvent } },
+    { new: true }
+  );
+
+  if (!issue) return res.status(404).json({ error: 'Issue not found' });
+  res.json(formatAdminIssue(issue));
+});
+
+router.patch('/issues/:id/assign', requireAdmin, async (req, res) => {
+  const { department } = req.body;
+  if (!department) return res.status(400).json({ error: 'Department required' });
+
+  const now = new Date().toLocaleString('en-IN', {
+    hour: '2-digit', minute: '2-digit', hour12: true,
+    day: '2-digit', month: 'short',
+  });
+
+  const existing = await Issue.findById(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'Issue not found' });
+  if (existing.aiAnalysis?.isSpam) {
+    return res.status(400).json({ error: 'Spam complaint cannot be assigned' });
+  }
+
+  const issue = await Issue.findByIdAndUpdate(
+    req.params.id,
+    {
+      assignedTo: department,
+      status: 'inprogress',
+      $push: {
+        timeline: {
+          time: now,
+          event: `Assigned to ${department}`,
+          icon: 'fa-building',
+          color: '#7c3aed',
+        },
+      },
+    },
+    { new: true }
+  );
+
+  if (!issue) return res.status(404).json({ error: 'Issue not found' });
+  res.json(formatAdminIssue(issue));
+});
+
+router.post('/issues/:id/reanalyze', requireAdmin, async (req, res) => {
+  try {
+    const issue = await Issue.findById(req.params.id);
+    if (!issue) return res.status(404).json({ error: 'Issue not found' });
+
+    const aiAnalysis = await runAIAnalysis({
+      description: issue.description,
+      category: issue.category,
+      imageUrl: issue.imageUrl || null,
+    });
+    issue.aiAnalysis = aiAnalysis;
+    if (aiAnalysis.isSpam) {
+      issue.assignedTo = 'Spam Queue';
+      const now = new Date().toLocaleString('en-IN', {
+        hour: '2-digit', minute: '2-digit', hour12: true,
+        day: '2-digit', month: 'short',
+      });
+      issue.timeline.push({
+        time: now,
+        event: 'AI moderation flagged this complaint as SPAM',
+        icon: 'fa-triangle-exclamation',
+        color: '#ef4444',
+      });
+    }
+    await issue.save();
+    res.json(formatAdminIssue(issue));
+  } catch (err) {
+    console.error('POST /admin/issues/:id/reanalyze error:', err.message);
+    res.status(500).json({ error: 'Failed to re-analyze complaint' });
+  }
+});
+
+const OFFICER_COLORS = ['#2563eb', '#7c3aed', '#059669', '#d97706', '#0891b2', '#ef4444'];
+
+router.get('/officers', requireAdmin, async (req, res) => {
+  const officers = await Officer.find().sort({ createdAt: 1 });
+  res.json(officers);
+});
+
+router.post('/officers', requireAdmin, async (req, res) => {
+  const { name, phone, role, zone } = req.body;
+  if (!name?.trim()) return res.status(400).json({ error: 'Name is required' });
+  const count = await Officer.countDocuments();
+  const initials = name.trim().split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  const color = OFFICER_COLORS[count % OFFICER_COLORS.length];
+  const officer = await Officer.create({ name: name.trim(), phone: phone || '', role: role || 'Field Officer', zone: zone || 'North Zone', initials, color });
+  res.status(201).json(officer);
+});
+
+router.get('/analysis', requireAdmin, async (req, res) => {
+  const total = await Issue.countDocuments();
+  const pending = await Issue.countDocuments({ status: 'pending' });
+  const inprogress = await Issue.countDocuments({ status: 'inprogress' });
+  const resolved = await Issue.countDocuments({ status: 'resolved' });
+
+  const categoryAgg = await Issue.aggregate([
+    { $group: { _id: '$category', count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+  ]);
+
+  const resolutionRatePct = total > 0 ? Math.round((resolved / total) * 100) : 0;
+
+  const resolvedIssues = await Issue.find({ status: 'resolved' });
+  let avgResolutionDays = 'N/A';
+  if (resolvedIssues.length > 0) {
+    const validDiffs = resolvedIssues
+      .map(issue => new Date(issue.updatedAt).getTime() - new Date(issue.createdAt).getTime())
+      .filter(ms => ms > 0);
+    if (validDiffs.length > 0) {
+      const avg = validDiffs.reduce((s, v) => s + v, 0) / validDiffs.length;
+      avgResolutionDays = (avg / (1000 * 60 * 60 * 24)).toFixed(1);
+    }
+  }
+
+  const peakCategory = categoryAgg[0]?._id || 'N/A';
+
+  // --- Heatmap zones (dynamic) ---
+  const allIssues = await Issue.find({}, { category: 1, status: 1, coordinates: 1, createdAt: 1, supporters: 1, assignedTo: 1, complaintId: 1, title: 1, location: 1 }).lean();
+
+  const zoneAgg = new Map(MUMBAI_ZONES.map(z => [z.name, { name: z.name, lat: z.lat, lng: z.lng, issues: 0, resolved: 0, top: 'N/A' }]));
+  const zoneCatCounts = new Map(MUMBAI_ZONES.map(z => [z.name, new Map()]));
+
+  for (const it of allIssues) {
+    const zoneName = bestZoneForIssue(it);
+    if (!zoneName) continue;
+    const z = zoneAgg.get(zoneName);
+    if (!z) continue;
+    z.issues += 1;
+    if (it.status === 'resolved') z.resolved += 1;
+    const catMap = zoneCatCounts.get(zoneName);
+    catMap.set(it.category, (catMap.get(it.category) || 0) + 1);
+  }
+
+  for (const [zoneName, catMap] of zoneCatCounts.entries()) {
+    let best = null;
+    for (const [cat, count] of catMap.entries()) {
+      if (!best || count > best.count) best = { cat, count };
+    }
+    if (best) {
+      const z = zoneAgg.get(zoneName);
+      z.top = best.cat?.charAt(0).toUpperCase() + best.cat?.slice(1);
+    }
+  }
+
+  const hotspots = [...zoneAgg.values()].sort((a, b) => b.issues - a.issues);
+
+  // --- Action queue (Top 10) ---
+  const nowMs = Date.now();
+  const ageDays = (d) => Math.max(0, (nowMs - new Date(d).getTime()) / (1000 * 60 * 60 * 24));
+  const likesCount = (it) => it.supporters?.length || 0;
+  const isOverdue = (it) => {
+    const days = ageDays(it.createdAt);
+    if (it.status === 'pending') return days >= 2;
+    if (it.status === 'inprogress') return days >= 7;
+    return false;
+  };
+
+  const quickWinCats = new Set(['streetlight', 'garbage', 'noise']);
+
+  const actionable = allIssues
+    .filter(it => it.status !== 'resolved')
+    .map(it => {
+      const days = ageDays(it.createdAt);
+      const likes = likesCount(it);
+      const unassigned = !it.assignedTo;
+      const overdue = isOverdue(it);
+      const quickWin = quickWinCats.has(it.category) && it.status === 'pending';
+
+      let score = 0;
+      if (unassigned) score += 50;
+      if (overdue) score += 35;
+      score += Math.min(likes, 150) * 0.4;
+      score += Math.min(days, 14) * 1.2;
+      if (quickWin) score += 12;
+
+      const reasons = [];
+      if (unassigned) reasons.push('Unassigned');
+      if (overdue) reasons.push(`Overdue (${days.toFixed(1)}d)`);
+      if (likes >= 20) reasons.push(`${likes} supporters`);
+      if (quickWin) reasons.push('Fast win');
+
+      return {
+        _id: it._id.toString(),
+        complaintId: it.complaintId || null,
+        title: it.title,
+        category: it.category,
+        location: it.location,
+        status: it.status,
+        assignedTo: it.assignedTo || null,
+        likes,
+        ageDays: Number(days.toFixed(1)),
+        score: Number(score.toFixed(1)),
+        reason: reasons.join(' · ') || 'Review',
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
+
+  res.json({
+    insightsVersion: 2,
+    total, pending, inprogress, resolved,
+    resolutionRatePct,
+    avgResolutionDays,
+    peakCategory,
+    categoryBreakdown: categoryAgg.map(c => ({ category: c._id, count: c.count })),
+    hotspots,
+    actionQueue: actionable,
+  });
+});
+
+export default router;

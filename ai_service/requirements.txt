@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+transformers
+torch
+torchvision
+pillow
+ftfy
+regex
+git+https://github.com/openai/CLIP.git
+python-multipart
