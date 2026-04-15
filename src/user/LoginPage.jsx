@@ -11,8 +11,8 @@ function AnimatedHero() {
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
           fontWeight: 500,
-          fontSize: '0.74rem',
-          letterSpacing: '0.28em',
+          fontSize: '0.6rem',
+          letterSpacing: '0.22em',
           textTransform: 'uppercase',
           color: '#14b8a6',
         }}>
