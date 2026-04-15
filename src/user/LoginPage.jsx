@@ -278,8 +278,8 @@ export default function LoginPage() {
             </div>
 
             {/* Stats */}
-            <div className="flex items-start justify-center gap-7 mt-3">
-              {[['5K+', 'Issues Resolved'], ['12K+', 'Active Citizens'], ['98%', 'Satisfaction']].map(([val, lbl]) => (
+            <div className="flex items-start gap-6 mt-3">
+              {[['5K+', 'Issues Resolved'], ['12K+', 'Active Citizens'], ['98%', 'Satisfaction'], ['48h', 'Avg Response']].map(([val, lbl]) => (
                 <div key={lbl}>
                   <div style={{
                     fontFamily: "'Bebas Neue', sans-serif",
