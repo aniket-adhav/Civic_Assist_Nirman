@@ -6,7 +6,7 @@ import { api } from '../lib/api';
 
 function AnimatedHero() {
   return (
-    <div className="flex flex-col items-start gap-5">
+    <div className="flex flex-col items-start gap-3">
       <div className="flex flex-col items-start gap-2">
         <p style={{
           fontFamily: "'DM Sans', sans-serif",
