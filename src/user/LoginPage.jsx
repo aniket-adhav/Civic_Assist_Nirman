@@ -250,27 +250,27 @@ export default function LoginPage() {
             <div style={{ height: '1px', background: 'linear-gradient(90deg, rgba(59,130,246,0.25), rgba(20,184,166,0.15), transparent)' }} />
 
             {/* Feature cards */}
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2">
               {features.map(f => (
-                <div key={f.title} className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl"
+                <div key={f.title} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl"
                   style={{ background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.12)' }}>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.2)' }}>
-                    <i className={`fas ${f.icon} text-sm`} style={{ color: '#60a5fa' }} />
+                    <i className={`fas ${f.icon} text-xs`} style={{ color: '#60a5fa' }} />
                   </div>
                   <div>
                     <div style={{
                       fontFamily: "'DM Sans', sans-serif",
                       fontWeight: 600,
-                      fontSize: '0.92rem',
+                      fontSize: '0.83rem',
                       color: '#cbd5e1',
                     }}>{f.title}</div>
                     <div style={{
                       fontFamily: "'DM Sans', sans-serif",
-                      fontSize: '0.78rem',
+                      fontSize: '0.71rem',
                       fontWeight: 400,
                       color: '#475569',
-                      marginTop: '2px',
+                      marginTop: '1px',
                     }}>{f.desc}</div>
                   </div>
                 </div>
@@ -278,13 +278,13 @@ export default function LoginPage() {
             </div>
 
             {/* Stats */}
-            <div className="flex items-start gap-8">
+            <div className="flex items-start gap-7">
               {[['5K+', 'Issues Resolved'], ['12K+', 'Active Citizens'], ['98%', 'Satisfaction']].map(([val, lbl]) => (
                 <div key={lbl}>
                   <div style={{
                     fontFamily: "'Bebas Neue', sans-serif",
                     fontWeight: 400,
-                    fontSize: '2.2rem',
+                    fontSize: '1.75rem',
                     letterSpacing: '0.04em',
                     background: 'linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)',
                     WebkitBackgroundClip: 'text',
@@ -294,12 +294,12 @@ export default function LoginPage() {
                   }}>{val}</div>
                   <div style={{
                     fontFamily: "'DM Sans', sans-serif",
-                    fontSize: '0.65rem',
+                    fontSize: '0.6rem',
                     fontWeight: 600,
                     color: '#334155',
                     letterSpacing: '0.14em',
                     textTransform: 'uppercase',
-                    marginTop: '4px',
+                    marginTop: '3px',
                   }}>{lbl}</div>
                 </div>
               ))}
