@@ -10,6 +10,22 @@
 }
 
 @font-face {
+  font-family: 'Docade';
+  src: url('/Docade-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Docade';
+  src: url('/Docade-Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Impact';
   src: url('/fonts/impact.ttf') format('truetype');
   font-weight: normal;

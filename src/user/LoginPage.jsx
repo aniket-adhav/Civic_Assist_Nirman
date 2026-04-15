@@ -20,11 +20,11 @@ function AnimatedHero() {
         </p>
 
         <h1 style={{
-          fontFamily: "'Bebas Neue', sans-serif",
+          fontFamily: "'Docade', sans-serif",
           fontWeight: 400,
-          fontSize: 'clamp(2.9rem, 5vw, 3.7rem)',
-          lineHeight: 1,
-          letterSpacing: '0.04em',
+          fontSize: 'clamp(2rem, 3.6vw, 2.9rem)',
+          lineHeight: 1.05,
+          letterSpacing: '0.02em',
           whiteSpace: 'nowrap',
           background: 'linear-gradient(135deg, #e2e8f0 0%, #93c5fd 45%, #60a5fa 100%)',
           WebkitBackgroundClip: 'text',
