@@ -119,6 +119,10 @@ export const api = {
     }));
   },
 
+  async getAdminIssueById(issueId) {
+    return handle(await fetch(`${BASE}/admin/issues/${issueId}`, { headers: adminHeaders() }));
+  },
+
   async getOfficers() {
     return handle(await fetch(`${BASE}/admin/officers`, { headers: adminHeaders() }));
   },

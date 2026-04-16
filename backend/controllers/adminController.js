@@ -65,7 +65,7 @@ function adminStatusLabel(status) {
 function formatAdminIssue(issue) {
   const likesCount = issue.supporters?.length || 0;
   const authenticity = issue.aiAnalysis?.authenticity || 'unknown';
-  const aiBadge = authenticity === 'fake' ? 'Fake (Spam)' : authenticity === 'real' ? 'Real' : 'Unknown';
+  const aiBadge = authenticity === 'fake' ? 'Fake (Spam)' : authenticity === 'real' ? 'Real' : authenticity === 'scanning' ? 'Scanning...' : 'Unknown';
   return {
     id: issue.complaintId || `#${issue._id.toString().slice(-4).toUpperCase()}`,
     _id: issue._id.toString(),
@@ -102,13 +102,26 @@ export async function getAdminIssues(req, res) {
   res.json(issues.map(formatAdminIssue));
 }
 
+export async function getAdminIssueById(req, res) {
+  try {
+    const issue = await Issue.findById(req.params.id);
+    if (!issue) return res.status(404).json({ error: 'Issue not found' });
+    res.json(formatAdminIssue(issue));
+  } catch (err) {
+    console.error('GET /admin/issues/:id error:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+}
+
 export async function getAdminStats(req, res) {
-  const total = await Issue.countDocuments();
-  const pending = await Issue.countDocuments({ status: 'pending' });
-  const inprogress = await Issue.countDocuments({ status: 'inprogress' });
-  const resolved = await Issue.countDocuments({ status: 'resolved' });
-  const fake = await Issue.countDocuments({ 'aiAnalysis.authenticity': 'fake' });
-  const real = await Issue.countDocuments({ 'aiAnalysis.authenticity': 'real' });
+  const [total, pending, inprogress, resolved, fake, real] = await Promise.all([
+    Issue.countDocuments(),
+    Issue.countDocuments({ status: 'pending' }),
+    Issue.countDocuments({ status: 'inprogress' }),
+    Issue.countDocuments({ status: 'resolved' }),
+    Issue.countDocuments({ 'aiAnalysis.authenticity': 'fake' }),
+    Issue.countDocuments({ 'aiAnalysis.authenticity': 'real' }),
+  ]);
   const unknown = Math.max(0, total - fake - real);
   res.json({ total, pending, inprogress, resolved, fake, real, unknown });
 }
@@ -187,27 +200,48 @@ export async function reanalyzeIssue(req, res) {
     const issue = await Issue.findById(req.params.id);
     if (!issue) return res.status(404).json({ error: 'Issue not found' });
 
-    const aiAnalysis = await runAIAnalysis({
-      description: issue.description,
-      category: issue.category,
-      imageUrl: issue.imageUrl || null,
-    });
-    issue.aiAnalysis = aiAnalysis;
-    if (aiAnalysis.isSpam) {
-      issue.assignedTo = 'Spam Queue';
-      const now = new Date().toLocaleString('en-IN', {
-        hour: '2-digit', minute: '2-digit', hour12: true,
-        day: '2-digit', month: 'short',
-      });
-      issue.timeline.push({
-        time: now,
-        event: 'AI moderation flagged this complaint as SPAM',
-        icon: 'fa-triangle-exclamation',
-        color: '#ef4444',
-      });
-    }
+    issue.aiAnalysis = {
+      textScore: issue.aiAnalysis?.textScore ?? null,
+      imageScore: issue.aiAnalysis?.imageScore ?? null,
+      finalScore: issue.aiAnalysis?.finalScore ?? null,
+      authenticity: 'scanning',
+      isSpam: false,
+    };
     await issue.save();
+
     res.json(formatAdminIssue(issue));
+
+    const issueId = issue._id;
+    const { description, category, imageUrl } = issue;
+
+    runAIAnalysis({ description, category, imageUrl: imageUrl || null })
+      .then(async (aiAnalysis) => {
+        const update = { aiAnalysis };
+        if (aiAnalysis.isSpam) {
+          const now = new Date().toLocaleString('en-IN', {
+            hour: '2-digit', minute: '2-digit', hour12: true,
+            day: '2-digit', month: 'short',
+          });
+          update.assignedTo = 'Spam Queue';
+          update.$push = {
+            timeline: {
+              time: now,
+              event: 'AI moderation flagged this complaint as SPAM',
+              icon: 'fa-triangle-exclamation',
+              color: '#ef4444',
+            },
+          };
+        }
+        await Issue.findByIdAndUpdate(issueId, update);
+        console.log(`Reanalysis complete for ${issueId}: score=${aiAnalysis.finalScore}, spam=${aiAnalysis.isSpam}`);
+      })
+      .catch((err) => {
+        console.error(`Background reanalysis failed for ${issueId}:`, err.message);
+        Issue.findByIdAndUpdate(issueId, {
+          'aiAnalysis.authenticity': 'unknown',
+        }).catch(() => {});
+      });
+
   } catch (err) {
     console.error('POST /admin/issues/:id/reanalyze error:', err.message);
     res.status(500).json({ error: 'Failed to re-analyze complaint' });
@@ -230,19 +264,23 @@ export async function createOfficer(req, res) {
 }
 
 export async function getAdminAnalysis(req, res) {
-  const total = await Issue.countDocuments();
-  const pending = await Issue.countDocuments({ status: 'pending' });
-  const inprogress = await Issue.countDocuments({ status: 'inprogress' });
-  const resolved = await Issue.countDocuments({ status: 'resolved' });
+  const LEAN_PROJECTION = { category: 1, status: 1, coordinates: 1, createdAt: 1, updatedAt: 1, supporters: 1, assignedTo: 1, complaintId: 1, title: 1, location: 1 };
 
-  const categoryAgg = await Issue.aggregate([
-    { $group: { _id: '$category', count: { $sum: 1 } } },
-    { $sort: { count: -1 } },
+  const [total, pending, inprogress, resolved, categoryAgg, allIssues] = await Promise.all([
+    Issue.countDocuments(),
+    Issue.countDocuments({ status: 'pending' }),
+    Issue.countDocuments({ status: 'inprogress' }),
+    Issue.countDocuments({ status: 'resolved' }),
+    Issue.aggregate([
+      { $group: { _id: '$category', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]),
+    Issue.find({}, LEAN_PROJECTION).lean(),
   ]);
 
   const resolutionRatePct = total > 0 ? Math.round((resolved / total) * 100) : 0;
 
-  const resolvedIssues = await Issue.find({ status: 'resolved' });
+  const resolvedIssues = allIssues.filter(i => i.status === 'resolved');
   let avgResolutionDays = 'N/A';
   if (resolvedIssues.length > 0) {
     const validDiffs = resolvedIssues
@@ -255,8 +293,6 @@ export async function getAdminAnalysis(req, res) {
   }
 
   const peakCategory = categoryAgg[0]?._id || 'N/A';
-
-  const allIssues = await Issue.find({}, { category: 1, status: 1, coordinates: 1, createdAt: 1, supporters: 1, assignedTo: 1, complaintId: 1, title: 1, location: 1 }).lean();
 
   const zoneAgg = new Map(MUMBAI_ZONES.map(z => [z.name, { name: z.name, lat: z.lat, lng: z.lng, issues: 0, resolved: 0, top: 'N/A' }]));
   const zoneCatCounts = new Map(MUMBAI_ZONES.map(z => [z.name, new Map()]));

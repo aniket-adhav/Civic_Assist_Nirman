@@ -61,17 +61,7 @@ export async function createIssue(req, res) {
       return res.status(400).json({ error: 'Photo is required' });
     }
 
-    // Upload image first (required before saving)
-    let imageUrl = '';
-    try {
-      const result = await uploadBuffer(req.file.buffer);
-      imageUrl = result.secure_url;
-    } catch (uploadErr) {
-      console.error('Cloudinary upload failed:', uploadErr.message);
-      return res.status(500).json({ error: 'Image upload failed. Check Cloudinary credentials.' });
-    }
-
-    const user = await User.findById(req.user.userId);
+    const [user] = await Promise.all([User.findById(req.user.userId)]);
     const reporterName = user?.name || 'Anonymous';
 
     const now = new Date().toLocaleString('en-IN', {
@@ -79,14 +69,13 @@ export async function createIssue(req, res) {
       day: '2-digit', month: 'short', year: 'numeric',
     });
 
-    // Create issue immediately with pending AI status — respond fast
     const issue = await Issue.create({
       title: title.trim(),
       description: description.trim(),
       category,
       location: location.trim(),
       coordinates: lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : undefined,
-      imageUrl,
+      imageUrl: '',
       reporter: {
         userId: req.user.userId,
         name: reporterName,
@@ -101,41 +90,50 @@ export async function createIssue(req, res) {
       aiAnalysis: { textScore: null, imageScore: null, finalScore: null, authenticity: 'unknown', isSpam: false },
     });
 
-    // Respond immediately — no waiting for AI
     res.status(201).json(formatForClient(issue, req.user.userId));
 
-    // Run AI analysis in background and patch the issue when done
     const imageBuffer = Buffer.from(req.file.buffer);
     const imageMimeType = req.file.mimetype;
     const issueId = issue._id;
     const descTrimmed = description.trim();
 
-    runAIAnalysis({ description: descTrimmed, category, imageBuffer, imageMimeType })
-      .then(async (aiResult) => {
-        const timelineAdditions = [];
-        if (aiResult.isSpam) {
-          timelineAdditions.push({
-            time: new Date().toLocaleString('en-IN', {
-              hour: '2-digit', minute: '2-digit', hour12: true,
-              day: '2-digit', month: 'short', year: 'numeric',
-            }),
-            event: 'AI moderation flagged this complaint as SPAM',
-            icon: 'fa-triangle-exclamation',
-            color: '#ef4444',
+    Promise.all([
+      uploadBuffer(imageBuffer).then(async (result) => {
+        await Issue.findByIdAndUpdate(issueId, { imageUrl: result.secure_url });
+        console.log(`Image uploaded for ${issueId}: ${result.secure_url}`);
+        return result.secure_url;
+      }).catch((err) => {
+        console.error(`Background Cloudinary upload failed for ${issueId}:`, err.message);
+        return null;
+      }),
+
+      runAIAnalysis({ description: descTrimmed, category, imageBuffer, imageMimeType })
+        .then(async (aiResult) => {
+          const timelineAdditions = [];
+          if (aiResult.isSpam) {
+            timelineAdditions.push({
+              time: new Date().toLocaleString('en-IN', {
+                hour: '2-digit', minute: '2-digit', hour12: true,
+                day: '2-digit', month: 'short', year: 'numeric',
+              }),
+              event: 'AI moderation flagged this complaint as SPAM',
+              icon: 'fa-triangle-exclamation',
+              color: '#ef4444',
+            });
+          }
+
+          await Issue.findByIdAndUpdate(issueId, {
+            aiAnalysis: aiResult,
+            ...(aiResult.isSpam && { assignedTo: 'Spam Queue' }),
+            ...(timelineAdditions.length > 0 && { $push: { timeline: { $each: timelineAdditions } } }),
           });
-        }
 
-        await Issue.findByIdAndUpdate(issueId, {
-          aiAnalysis: aiResult,
-          ...(aiResult.isSpam && { assignedTo: 'Spam Queue' }),
-          ...(timelineAdditions.length > 0 && { $push: { timeline: { $each: timelineAdditions } } }),
-        });
-
-        console.log(`AI analysis complete for ${issueId}: score=${aiResult.finalScore}, spam=${aiResult.isSpam}`);
-      })
-      .catch((err) => {
-        console.error(`Background AI analysis failed for ${issueId}:`, err.message);
-      });
+          console.log(`AI analysis complete for ${issueId}: score=${aiResult.finalScore}, spam=${aiResult.isSpam}`);
+        })
+        .catch((err) => {
+          console.error(`Background AI analysis failed for ${issueId}:`, err.message);
+        }),
+    ]);
 
   } catch (err) {
     console.error('POST /issues error:', err);

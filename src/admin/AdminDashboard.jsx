@@ -96,7 +96,8 @@ function ComplaintDetail({ complaint, dark, onClose, onStatusChange, onAssign, o
   const dept = DEPT_MAP[complaint.category];
   const isAssigned = !!complaint.assignedTo;
   const isSpam = !!complaint.aiAnalysis?.isSpam;
-  const hasAI = complaint.aiAnalysis && typeof complaint.aiAnalysis.finalScore === 'number';
+  const isScanning = complaint.aiAnalysis?.authenticity === 'scanning';
+  const hasAI = !isScanning && complaint.aiAnalysis && typeof complaint.aiAnalysis.finalScore === 'number';
   const [imageOpen, setImageOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
 
@@ -176,18 +177,23 @@ function ComplaintDetail({ complaint, dark, onClose, onStatusChange, onAssign, o
 
           {/* AI Analysis */}
           <div className={`rounded-2xl border p-5 shadow-sm space-y-4 ${
-            isSpam
-              ? (dark ? 'bg-red-950/30 border-red-700/50' : 'bg-red-50 border-red-200')
-              : (dark ? 'bg-emerald-950/20 border-emerald-700/30' : 'bg-emerald-50/80 border-emerald-200')
+            isScanning
+              ? (dark ? 'bg-blue-950/20 border-blue-700/30' : 'bg-blue-50/80 border-blue-200')
+              : isSpam
+                ? (dark ? 'bg-red-950/30 border-red-700/50' : 'bg-red-50 border-red-200')
+                : (dark ? 'bg-emerald-950/20 border-emerald-700/30' : 'bg-emerald-50/80 border-emerald-200')
           }`}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isSpam ? 'bg-red-500' : 'bg-emerald-500'}`}>
-                  <i className={`fas ${isSpam ? 'fa-shield-virus' : 'fa-shield-check'} text-white text-sm`} />
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isScanning ? 'bg-blue-500' : isSpam ? 'bg-red-500' : 'bg-emerald-500'}`}>
+                  {isScanning
+                    ? <div className="w-4 h-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                    : <i className={`fas ${isSpam ? 'fa-shield-virus' : 'fa-shield-check'} text-white text-sm`} />
+                  }
                 </div>
                 <div>
-                  <p className={`text-xs font-black ${isSpam ? (dark ? 'text-red-300' : 'text-red-700') : (dark ? 'text-emerald-300' : 'text-emerald-700')}`}>
-                    {isSpam ? 'Flagged as Fake / Spam' : 'Verified as Genuine'}
+                  <p className={`text-xs font-black ${isScanning ? (dark ? 'text-blue-300' : 'text-blue-700') : isSpam ? (dark ? 'text-red-300' : 'text-red-700') : (dark ? 'text-emerald-300' : 'text-emerald-700')}`}>
+                    {isScanning ? 'AI Scan in Progress' : isSpam ? 'Flagged as Fake / Spam' : 'Verified as Genuine'}
                   </p>
                   <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-slate-400'}`}>AI Authenticity Analysis</p>
                 </div>
@@ -209,7 +215,13 @@ function ComplaintDetail({ complaint, dark, onClose, onStatusChange, onAssign, o
               </button>
             </div>
 
-            {hasAI ? (
+            {isScanning ? (
+              <div className="flex flex-col items-center gap-3 py-4">
+                <div className="w-10 h-10 rounded-full border-4 border-blue-200 border-t-blue-500 animate-spin" />
+                <p className={`text-xs font-semibold ${dark ? 'text-blue-300' : 'text-blue-600'}`}>AI is scanning this complaint…</p>
+                <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Scores will appear automatically when done.</p>
+              </div>
+            ) : hasAI ? (
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2.5">
                   <ScoreCard label="Text Score"  value={complaint.aiAnalysis.textScore}  icon="fa-align-left"     dark={dark} />
@@ -614,8 +626,33 @@ export default function AdminDashboard() {
       const updated = await api.reanalyzeIssue(_id);
       setComplaints(prev => prev.map(c => c._id === _id ? updated : c));
       setSelectedComplaint(prev => prev?._id === _id ? updated : prev);
-      const refreshedStats = await api.getAdminStats();
-      setStats(refreshedStats);
+
+      if (updated?.aiAnalysis?.authenticity === 'scanning') {
+        const poll = async () => {
+          const MAX_POLLS = 30;
+          let attempts = 0;
+          while (attempts < MAX_POLLS) {
+            await new Promise(r => setTimeout(r, 3000));
+            attempts++;
+            try {
+              const fresh = await api.getAdminIssueById(_id);
+              setComplaints(prev => prev.map(c => c._id === _id ? fresh : c));
+              setSelectedComplaint(prev => prev?._id === _id ? fresh : prev);
+              if (fresh?.aiAnalysis?.authenticity !== 'scanning') {
+                const refreshedStats = await api.getAdminStats();
+                setStats(refreshedStats);
+                break;
+              }
+            } catch (pollErr) {
+              console.warn('Polling error:', pollErr.message);
+            }
+          }
+        };
+        poll();
+      } else {
+        const refreshedStats = await api.getAdminStats();
+        setStats(refreshedStats);
+      }
     } catch (err) {
       console.error('AI reanalyze failed:', err.message);
     }

@@ -2,6 +2,7 @@ import express from 'express';
 import { requireAdmin } from '../middleware/auth.js';
 import {
   getAdminIssues,
+  getAdminIssueById,
   getAdminStats,
   updateIssueStatus,
   assignIssue,
@@ -14,6 +15,7 @@ import {
 const router = express.Router();
 
 router.get('/issues', requireAdmin, getAdminIssues);
+router.get('/issues/:id', requireAdmin, getAdminIssueById);
 router.get('/stats', requireAdmin, getAdminStats);
 router.patch('/issues/:id/status', requireAdmin, updateIssueStatus);
 router.patch('/issues/:id/assign', requireAdmin, assignIssue);
