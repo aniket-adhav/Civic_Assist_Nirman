@@ -57,268 +57,351 @@ function DonutRing({ pct, color, size = 88, stroke = 11, dark }) {
   );
 }
 
+function ScoreBar({ label, value, dark }) {
+  const pct = Math.round((value ?? 0.5) * 100);
+  const color = pct >= 60 ? '#059669' : pct >= 40 ? '#f59e0b' : '#ef4444';
+  return (
+    <div className="space-y-1.5">
+      <div className="flex justify-between items-center">
+        <span className={`text-[10px] font-black uppercase tracking-widest ${dark ? 'text-slate-500' : 'text-slate-400'}`}>{label}</span>
+        <span className="text-xs font-black" style={{ color }}>{typeof value === 'number' ? value.toFixed(3) : '--'}</span>
+      </div>
+      <div className={`w-full h-2 rounded-full overflow-hidden ${dark ? 'bg-slate-700' : 'bg-slate-100'}`}>
+        <div
+          className="h-full rounded-full transition-all duration-700"
+          style={{ width: `${pct}%`, background: color }}
+        />
+      </div>
+    </div>
+  );
+}
+
 function ComplaintDetail({ complaint, dark, onClose, onStatusChange, onAssign, onReanalyze }) {
   const dept = DEPT_MAP[complaint.category];
   const isAssigned = !!complaint.assignedTo;
   const isSpam = !!complaint.aiAnalysis?.isSpam;
+  const hasAI = complaint.aiAnalysis && typeof complaint.aiAnalysis.finalScore === 'number';
   const [imageOpen, setImageOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
 
-  const statusGrad = {
-    Pending:      'bg-amber-100 text-amber-700',
-    'In Progress': 'bg-blue-100 text-blue-700',
-    Resolved:     'bg-emerald-100 text-emerald-700',
+  const statusMeta = {
+    Pending:       { pill: 'bg-amber-100 text-amber-700',   dot: '#f59e0b' },
+    'In Progress': { pill: 'bg-blue-100 text-blue-700',     dot: '#2563eb' },
+    Resolved:      { pill: 'bg-emerald-100 text-emerald-700', dot: '#059669' },
   };
 
   const askConfirm = (action) => setConfirmAction(action);
   const closeConfirm = () => setConfirmAction(null);
-  const runConfirmedAction = () => {
-    confirmAction?.onConfirm?.();
-    setConfirmAction(null);
-  };
+  const runConfirmedAction = () => { confirmAction?.onConfirm?.(); setConfirmAction(null); };
 
   return (
-    <div className="animate-fadeIn space-y-6">
-      <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.animate-fadeIn{animation:fadeIn 0.3s ease}`}</style>
+    <div className="animate-fadeIn space-y-5">
+      <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.animate-fadeIn{animation:fadeIn 0.3s ease}`}</style>
 
-      {/* Hero image */}
-      <section className="overflow-hidden rounded-3xl shadow-xl relative" style={{ height: 360 }}>
-        {complaint.image ? (
-          <img src={complaint.image} alt={complaint.title} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-6xl text-white" style={{ background: `linear-gradient(135deg, ${dept?.color || '#2563eb'}, ${dept?.color || '#2563eb'}88)` }}>
-            <i className={`fas ${dept?.icon || 'fa-circle-exclamation'}`} />
-          </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
+      {/* ── Hero ── */}
+      <section className="overflow-hidden rounded-3xl shadow-xl relative" style={{ height: 320 }}>
+        {complaint.image
+          ? <img src={complaint.image} alt={complaint.title} className="w-full h-full object-cover" />
+          : <div className="w-full h-full flex items-center justify-center text-6xl text-white"
+              style={{ background: `linear-gradient(135deg,${dept?.color||'#2563eb'},${dept?.color||'#2563eb'}88)` }}>
+              <i className={`fas ${dept?.icon||'fa-circle-exclamation'}`} />
+            </div>
+        }
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/10" />
 
-        <button
-          onClick={onClose}
-          className="absolute left-4 top-4 w-10 h-10 rounded-full bg-black/40 backdrop-blur text-white flex items-center justify-center hover:bg-black/60 transition"
-        >
+        <button onClick={onClose}
+          className="absolute left-4 top-4 w-10 h-10 rounded-full bg-black/40 backdrop-blur text-white flex items-center justify-center hover:bg-black/60 transition z-10">
           <i className="fas fa-arrow-left" />
         </button>
 
+        {isSpam && (
+          <div className="absolute right-4 top-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-600 text-white text-[10px] font-black uppercase tracking-widest shadow-lg">
+            <i className="fas fa-shield-virus" /> Spam Flagged
+          </div>
+        )}
+
         <div className="absolute bottom-5 left-5 right-5">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${statusGrad[complaint.status] || 'bg-slate-100 text-slate-700'}`}>
-              <span className="w-1.5 h-1.5 rounded-full bg-current" />{complaint.status}
+          <div className="flex flex-wrap items-center gap-2 mb-2.5">
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${statusMeta[complaint.status]?.pill || 'bg-slate-100 text-slate-600'}`}>
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: statusMeta[complaint.status]?.dot }} />{complaint.status}
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 text-white text-[10px] font-black uppercase tracking-widest backdrop-blur">
-              <i className={`fas ${dept?.icon || 'fa-circle'}`} />{complaint.category}
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-white text-[10px] font-black uppercase tracking-widest backdrop-blur">
+              <i className={`fas ${dept?.icon||'fa-circle'}`} />{complaint.category}
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 text-white text-[10px] font-black uppercase tracking-widest backdrop-blur">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-white text-[10px] font-black uppercase tracking-widest backdrop-blur">
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: priorityColor[complaint.priority] }} />{complaint.priority} Priority
             </span>
-            {complaint?.aiAnalysis?.badge && (
-              <span
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur ${
-                  complaint.aiAnalysis.isSpam ? 'bg-red-500/90 text-white' : 'bg-emerald-500/85 text-white'
-                }`}
-              >
-                <i className={`fas ${complaint.aiAnalysis.isSpam ? 'fa-shield-virus' : 'fa-shield-check'}`} />
-                {complaint.aiAnalysis.badge}
-              </span>
-            )}
           </div>
-          <h1 className="text-3xl font-black text-white leading-tight drop-shadow-lg">{complaint.title}</h1>
-          <div className="flex flex-wrap items-center gap-4 mt-2 text-xs font-semibold text-white/80">
+          <h1 className="text-2xl font-black text-white leading-tight drop-shadow-lg">{complaint.title}</h1>
+          <div className="flex flex-wrap items-center gap-4 mt-1.5 text-xs text-white/75">
             <span className="flex items-center gap-1.5"><i className="fas fa-location-dot text-blue-300" />{complaint.location}</span>
             <span className="flex items-center gap-1.5"><i className="fas fa-clock text-blue-300" />{complaint.submittedAt}</span>
           </div>
-          <div className="flex gap-2 mt-4">
-            {complaint.image && (
-              <button
-                onClick={() => setImageOpen(true)}
-                className="px-4 py-2.5 rounded-xl bg-white/15 backdrop-blur text-white text-xs font-black hover:bg-white/25 transition"
-              >
-                <i className="fas fa-expand mr-1.5" />View Image
-              </button>
-            )}
-          </div>
+          {complaint.image && (
+            <button onClick={() => setImageOpen(true)}
+              className="mt-3 px-4 py-2 rounded-xl bg-white/15 backdrop-blur text-white text-xs font-black hover:bg-white/25 transition">
+              <i className="fas fa-expand mr-1.5" />View Full Image
+            </button>
+          )}
         </div>
       </section>
 
+      {/* ── Main Grid ── */}
       <div className="grid items-start gap-5 xl:grid-cols-2">
-        {/* Details card */}
-        <div className={`rounded-3xl border p-6 shadow-sm space-y-5 ${card(dark)}`}>
-          <p className={`text-[10px] font-black uppercase tracking-widest ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Complaint Details</p>
-          <p className={`text-sm leading-7 ${dark ? 'text-slate-300' : 'text-slate-700'}`}>{complaint.description}</p>
-          <div className={`rounded-2xl border p-4 ${
-            complaint.aiAnalysis?.isSpam
-              ? (dark ? 'bg-red-900/15 border-red-700/50' : 'bg-red-50 border-red-200')
-              : (dark ? 'bg-emerald-900/10 border-emerald-700/40' : 'bg-emerald-50 border-emerald-200')
+
+        {/* LEFT — Description + AI Analysis */}
+        <div className="space-y-4">
+
+          {/* Description */}
+          <div className={`rounded-2xl border p-5 shadow-sm ${card(dark)}`}>
+            <p className={`text-[10px] font-black uppercase tracking-widest mb-3 ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Complaint Description</p>
+            <p className={`text-sm leading-7 ${dark ? 'text-slate-300' : 'text-slate-700'}`}>{complaint.description}</p>
+          </div>
+
+          {/* AI Analysis */}
+          <div className={`rounded-2xl border p-5 shadow-sm space-y-4 ${
+            isSpam
+              ? (dark ? 'bg-red-950/30 border-red-700/50' : 'bg-red-50 border-red-200')
+              : (dark ? 'bg-emerald-950/20 border-emerald-700/30' : 'bg-emerald-50/80 border-emerald-200')
           }`}>
-            <div className="flex items-center justify-between gap-3 mb-3">
-              <p className={`text-[10px] font-black uppercase tracking-widest ${dark ? 'text-slate-500' : 'text-slate-400'}`}>AI Authenticity Scores</p>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isSpam ? 'bg-red-500' : 'bg-emerald-500'}`}>
+                  <i className={`fas ${isSpam ? 'fa-shield-virus' : 'fa-shield-check'} text-white text-sm`} />
+                </div>
+                <div>
+                  <p className={`text-xs font-black ${isSpam ? (dark ? 'text-red-300' : 'text-red-700') : (dark ? 'text-emerald-300' : 'text-emerald-700')}`}>
+                    {isSpam ? 'Flagged as Fake / Spam' : 'Verified as Genuine'}
+                  </p>
+                  <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-slate-400'}`}>AI Authenticity Analysis</p>
+                </div>
+              </div>
               <button
                 onClick={() => askConfirm({
-                  title: 'Re-run AI scan?',
-                  message: 'This will analyze the complaint again and update the authenticity result.',
+                  title: 'Re-run AI Scan?',
+                  message: 'This will re-analyze the complaint text and image and update the authenticity scores.',
                   confirmText: 'Run Scan',
                   icon: 'fa-rotate-right',
                   color: '#2563eb',
                   onConfirm: () => onReanalyze(complaint._id),
                 })}
-                className={`text-[10px] font-black px-2.5 py-1 rounded-lg transition-colors ${
-                  dark ? 'bg-slate-900 text-blue-300 hover:bg-slate-700' : 'bg-white text-blue-600 hover:bg-blue-50'
+                className={`flex items-center gap-1.5 text-[10px] font-black px-3 py-1.5 rounded-lg transition-colors ${
+                  dark ? 'bg-slate-800 text-blue-300 hover:bg-slate-700' : 'bg-white text-blue-600 hover:bg-blue-50 border border-blue-100'
                 }`}
               >
-                <i className="fas fa-rotate-right mr-1" />
-                Re-run AI Scan
+                <i className="fas fa-rotate-right" />Re-scan
               </button>
             </div>
-            <div className="mb-3">
-              <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider ${
-                complaint.aiAnalysis?.isSpam
-                  ? (dark ? 'bg-red-900/40 text-red-300 border border-red-700' : 'bg-red-100 text-red-700 border border-red-200')
-                  : (dark ? 'bg-emerald-900/30 text-emerald-300 border border-emerald-700' : 'bg-emerald-100 text-emerald-700 border border-emerald-200')
-              }`}>
-                <i className={`fas ${complaint.aiAnalysis?.isSpam ? 'fa-triangle-exclamation' : 'fa-shield-check'}`} />
-                {complaint.aiAnalysis?.isSpam ? 'Fake / Spam Complaint' : 'Verified as Real'}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+
+            {hasAI ? (
+              <div className="space-y-3">
+                <ScoreBar label="Text Score" value={complaint.aiAnalysis.textScore} dark={dark} />
+                <ScoreBar label="Image Score" value={complaint.aiAnalysis.imageScore} dark={dark} />
+                <div className={`h-px ${dark ? 'bg-slate-700' : 'bg-slate-200'}`} />
+                <ScoreBar label="Final Authenticity Score" value={complaint.aiAnalysis.finalScore} dark={dark} />
+                <p className={`text-[10px] leading-relaxed ${dark ? 'text-slate-500' : 'text-slate-400'}`}>
+                  {isSpam
+                    ? 'Score below 0.5 — image and description appear mismatched or irrelevant to the reported category.'
+                    : 'Score above 0.5 — content matches the reported category and appears genuine.'}
+                </p>
+              </div>
+            ) : (
+              <p className={`text-xs ${dark ? 'text-slate-500' : 'text-slate-400'}`}>No AI scan data. Click Re-scan to analyze.</p>
+            )}
+          </div>
+
+          {/* Reporter Info — always visible */}
+          <div className={`rounded-2xl border p-5 shadow-sm ${card(dark)}`}>
+            <p className={`text-[10px] font-black uppercase tracking-widest mb-3 ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Reporter Information</p>
+            <div className="grid grid-cols-3 gap-3 mb-4">
               {[
-                { label: 'Text Score', value: complaint.aiAnalysis?.textScore },
-                { label: 'Image Score', value: complaint.aiAnalysis?.imageScore },
-                { label: 'Final Score', value: complaint.aiAnalysis?.finalScore },
-                { label: 'Status', value: complaint.aiAnalysis?.badge || 'Unknown' },
-              ].map((item) => (
-                <div key={item.label} className={`rounded-xl px-3 py-2.5 ${dark ? 'bg-slate-900' : 'bg-white'}`}>
-                  <p className={`text-[9px] font-black uppercase tracking-widest ${dark ? 'text-slate-500' : 'text-slate-400'}`}>{item.label}</p>
-                  <p className={`text-xs font-bold mt-1 ${dark ? 'text-slate-200' : 'text-slate-800'}`}>
-                    {typeof item.value === 'number' ? item.value.toFixed(3) : (item.value || '--')}
-                  </p>
+                { icon: 'fa-user', label: 'Name', value: complaint.reporter },
+                { icon: 'fa-phone', label: 'Phone', value: complaint.phone },
+                { icon: 'fa-calendar', label: 'Filed', value: complaint.date },
+              ].map((p, i) => (
+                <div key={i} className={`rounded-xl p-3 ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-slate-50 border border-slate-100'}`}>
+                  <i className={`fas ${p.icon} text-blue-500 mb-1.5 block text-xs`} />
+                  <p className={`text-[9px] font-black uppercase tracking-widest ${dark ? 'text-slate-500' : 'text-slate-400'}`}>{p.label}</p>
+                  <p className={`text-xs font-bold mt-0.5 truncate ${dark ? 'text-slate-200' : 'text-slate-800'}`}>{p.value || '—'}</p>
                 </div>
               ))}
             </div>
-          </div>
-          {!isSpam && (
-            <>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { icon: 'fa-user', label: 'Reporter', value: complaint.reporter },
-                  { icon: 'fa-phone', label: 'Contact', value: complaint.phone },
-                  { icon: 'fa-calendar', label: 'Filed', value: complaint.date },
-                ].map((p, i) => (
-                  <div key={i} className={`rounded-2xl border p-4 ${dark ? 'bg-slate-800 border-slate-700' : 'bg-slate-50 border-slate-100'}`}>
-                    <i className={`fas ${p.icon} text-blue-500 mb-2 block text-sm`} />
-                    <p className={`text-[9px] font-black uppercase tracking-widest ${dark ? 'text-slate-500' : 'text-slate-400'}`}>{p.label}</p>
-                    <p className={`text-xs font-bold mt-0.5 truncate ${dark ? 'text-slate-200' : 'text-slate-800'}`}>{p.value}</p>
-                  </div>
-                ))}
-              </div>
-              <a
-                href={`tel:${complaint.phone}`}
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-white font-bold text-sm shadow-md active:scale-95 transition-all"
-                style={{ background: 'linear-gradient(135deg, #2563eb, #7c3aed)' }}
-              >
-                <i className="fas fa-phone" />Call Reporter
-              </a>
-            </>
-          )}
-        </div>
-
-        {/* Admin actions / Investigation */}
-        {isSpam ? (
-          <div className={`rounded-3xl border p-6 shadow-sm space-y-5 ${
-            dark ? 'bg-red-900/15 border-red-700/50' : 'bg-red-50 border-red-200'
-          }`}>
-            <p className={`text-[10px] font-black uppercase tracking-widest ${dark ? 'text-red-300' : 'text-red-600'}`}>Fake Complaint Investigation</p>
-            <div className={`rounded-2xl border px-4 py-3 text-xs font-bold ${dark ? 'bg-red-900/30 border-red-700 text-red-200' : 'bg-white border-red-200 text-red-700'}`}>
-              <i className="fas fa-shield-virus mr-2" />
-              AI marked this complaint as fake/spam. Admin action buttons are disabled for safety.
-            </div>
-            <a
-              href={`tel:${complaint.phone}`}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-white font-bold text-sm shadow-md active:scale-95 transition-all"
-              style={{ background: 'linear-gradient(135deg,#dc2626,#b91c1c)' }}
-            >
-              <i className="fas fa-phone" />
-              Call User For Inquiry
+            <a href={`tel:${complaint.phone}`}
+              className={`flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-white text-xs font-black shadow-sm active:scale-95 transition-all ${
+                isSpam ? 'bg-gradient-to-r from-red-500 to-red-600' : 'bg-gradient-to-r from-blue-500 to-violet-600'
+              }`}>
+              <i className="fas fa-phone" />{isSpam ? 'Call Reporter for Inquiry' : 'Call Reporter'}
             </a>
           </div>
-        ) : (
-          <div className={`rounded-3xl border p-6 shadow-sm space-y-5 ${card(dark)}`}>
-            <p className={`text-[10px] font-black uppercase tracking-widest ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Admin Actions</p>
+        </div>
 
-            <div>
-              <p className={`text-xs font-bold mb-2 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Department Assignment</p>
-              {isAssigned ? (
-                <div className="flex items-center gap-3 px-4 py-3 rounded-2xl border" style={{ background: `${dept?.color}12`, borderColor: `${dept?.color}30` }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${dept?.color}22` }}>
-                    <i className={`fas ${dept?.icon} text-base`} style={{ color: dept?.color }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black" style={{ color: dept?.color }}>{complaint.assignedTo}</p>
-                    <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-slate-400'}`}>{dept?.dept ? `${dept.dept} · Dept Head` : 'Assigned & notified'}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {dept?.phone && (
-                      <a
-                        href={`tel:${dept.phone}`}
-                        className="w-8 h-8 rounded-full flex items-center justify-center"
-                        style={{ background: `${dept?.color}18` }}
-                        title={`Call ${dept?.head}`}
-                      >
-                        <i className="fas fa-phone text-xs" style={{ color: dept?.color }} />
-                      </a>
-                    )}
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: `${dept?.color}20` }}>
-                      <i className="fas fa-circle-check text-sm" style={{ color: dept?.color }} />
-                    </div>
-                  </div>
+        {/* RIGHT — Admin Actions */}
+        {isSpam ? (
+          /* ── SPAM Panel ── */
+          <div className="space-y-4">
+            <div className={`rounded-2xl border p-5 shadow-sm ${dark ? 'bg-red-950/25 border-red-700/50' : 'bg-red-50 border-red-200'}`}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-red-500 flex items-center justify-center flex-shrink-0">
+                  <i className="fas fa-triangle-exclamation text-white" />
                 </div>
-              ) : (
+                <div>
+                  <p className={`text-sm font-black ${dark ? 'text-red-300' : 'text-red-700'}`}>Spam Investigation Mode</p>
+                  <p className={`text-[10px] ${dark ? 'text-red-400/70' : 'text-red-500'}`}>Assignment & status actions are locked</p>
+                </div>
+              </div>
+
+              <div className={`rounded-xl p-4 mb-4 text-xs leading-relaxed ${dark ? 'bg-red-900/30 border border-red-700 text-red-200' : 'bg-white border border-red-200 text-red-700'}`}>
+                <p className="font-black mb-1"><i className="fas fa-robot mr-2" />AI Moderation Report</p>
+                <p className="font-medium opacity-80">The image uploaded does not match the reported category or the description provided. This complaint has been automatically queued for manual review.</p>
+              </div>
+
+              <div className="space-y-2.5">
+                <p className={`text-[10px] font-black uppercase tracking-widest ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Investigator Actions</p>
                 <button
                   onClick={() => askConfirm({
-                    title: 'Confirm department assignment',
-                    message: `Assign this complaint to ${dept?.head || 'the department head'} from ${dept?.dept || 'the selected department'}?`,
-                    confirmText: 'Assign Department',
-                    icon: 'fa-user-check',
-                    color: dept?.color || '#2563eb',
-                    onConfirm: () => onAssign(complaint._id, dept?.head),
+                    title: 'Re-run AI Scan?',
+                    message: 'Re-analyze this complaint. If it passes, it will be cleared from spam.',
+                    confirmText: 'Run Scan',
+                    icon: 'fa-rotate-right',
+                    color: '#2563eb',
+                    onConfirm: () => onReanalyze(complaint._id),
                   })}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-white font-bold shadow-lg active:scale-95 transition-all"
-                  style={{ background: `linear-gradient(135deg, ${dept?.color || '#2563eb'}, ${dept?.color || '#2563eb'}aa)` }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black transition-all active:scale-95 border ${
+                    dark ? 'border-blue-700 bg-blue-900/20 text-blue-300 hover:bg-blue-900/40' : 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100'
+                  }`}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                    <i className={`fas ${dept?.icon || 'fa-building'} text-base`} />
-                  </div>
-                  <div className="text-left flex-1">
-                    <p className="text-sm font-black">Assign to {dept?.head || 'Dept Head'}</p>
-                    <p className="text-[10px] font-normal opacity-80">{dept?.dept || 'Department'} · Tap to notify</p>
-                  </div>
-                  <i className="fas fa-arrow-right opacity-70" />
+                  <i className="fas fa-rotate-right" />Re-run AI Verification
                 </button>
+                <button
+                  onClick={() => askConfirm({
+                    title: 'Override — Mark as Genuine?',
+                    message: 'You are manually overriding the AI decision. This will clear the spam flag and allow the complaint to be processed.',
+                    confirmText: 'Override & Clear',
+                    icon: 'fa-user-shield',
+                    color: '#059669',
+                    onConfirm: () => onStatusChange(complaint._id, 'pending'),
+                  })}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black transition-all active:scale-95 border ${
+                    dark ? 'border-emerald-700 bg-emerald-900/20 text-emerald-300 hover:bg-emerald-900/40' : 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                  }`}
+                >
+                  <i className="fas fa-user-shield" />Admin Override — Mark as Genuine
+                </button>
+                <button
+                  onClick={() => askConfirm({
+                    title: 'Dismiss & Close?',
+                    message: 'Mark this complaint as resolved / closed without processing. This cannot be undone easily.',
+                    confirmText: 'Dismiss Complaint',
+                    icon: 'fa-ban',
+                    color: '#dc2626',
+                    onConfirm: () => onStatusChange(complaint._id, 'Resolved'),
+                  })}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black transition-all active:scale-95 border ${
+                    dark ? 'border-red-800 bg-red-900/20 text-red-300 hover:bg-red-900/40' : 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100'
+                  }`}
+                >
+                  <i className="fas fa-ban" />Dismiss Spam Complaint
+                </button>
+              </div>
+            </div>
+
+            {/* Locked assignment notice */}
+            <div className={`rounded-2xl border p-4 flex items-center gap-3 ${dark ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200 bg-slate-50'}`}>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${dark ? 'bg-slate-700' : 'bg-slate-200'}`}>
+                <i className={`fas fa-lock text-sm ${dark ? 'text-slate-400' : 'text-slate-500'}`} />
+              </div>
+              <div>
+                <p className={`text-xs font-black ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Assignment Locked</p>
+                <p className={`text-[10px] ${dark ? 'text-slate-600' : 'text-slate-400'}`}>Clear spam flag to enable department assignment</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* ── Normal Admin Actions ── */
+          <div className="space-y-4">
+
+            {/* Department Assignment */}
+            <div className={`rounded-2xl border p-5 shadow-sm ${card(dark)}`}>
+              <p className={`text-[10px] font-black uppercase tracking-widest mb-3 ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Department Assignment</p>
+              {isAssigned ? (
+                <div>
+                  <div className="flex items-center gap-3 p-4 rounded-xl border" style={{ background: `${dept?.color}10`, borderColor: `${dept?.color}30` }}>
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${dept?.color}20` }}>
+                      <i className={`fas ${dept?.icon||'fa-building'} text-base`} style={{ color: dept?.color }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-black truncate" style={{ color: dept?.color }}>{complaint.assignedTo}</p>
+                      <p className={`text-[10px] mt-0.5 ${dark ? 'text-slate-500' : 'text-slate-400'}`}>{dept?.dept || 'Department'} · Notified</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {dept?.phone && (
+                        <a href={`tel:${dept.phone}`}
+                          className="w-8 h-8 rounded-full flex items-center justify-center transition hover:scale-110"
+                          style={{ background: `${dept?.color}20` }}>
+                          <i className="fas fa-phone text-xs" style={{ color: dept?.color }} />
+                        </a>
+                      )}
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: `${dept?.color}20` }}>
+                        <i className="fas fa-circle-check text-sm text-emerald-500" />
+                      </div>
+                    </div>
+                  </div>
+                  <p className={`text-[10px] mt-2 text-center ${dark ? 'text-slate-600' : 'text-slate-400'}`}>Complaint assigned and department head notified</p>
+                </div>
+              ) : (
+                <div>
+                  <div className={`rounded-xl p-3 mb-3 flex items-center gap-3 ${dark ? 'bg-slate-800 border border-slate-700' : 'bg-slate-50 border border-slate-100'}`}>
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${dept?.color}20` }}>
+                      <i className={`fas ${dept?.icon||'fa-building'} text-sm`} style={{ color: dept?.color }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-xs font-black truncate ${dark ? 'text-slate-200' : 'text-slate-800'}`}>{dept?.dept || 'General Administration'}</p>
+                      <p className={`text-[10px] ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Head: {dept?.head || 'Dept Head'} · {dept?.phone}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => askConfirm({
+                      title: 'Assign to Department?',
+                      message: `Assign this complaint to ${dept?.head||'the department head'} at ${dept?.dept||'the department'}? They will be notified immediately.`,
+                      confirmText: 'Assign Now',
+                      icon: 'fa-user-check',
+                      color: dept?.color || '#2563eb',
+                      onConfirm: () => onAssign(complaint._id, dept?.head),
+                    })}
+                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-white font-bold text-sm shadow-md active:scale-95 transition-all"
+                    style={{ background: `linear-gradient(135deg,${dept?.color||'#2563eb'},${dept?.color||'#2563eb'}cc)` }}
+                  >
+                    <i className={`fas ${dept?.icon||'fa-building'}`} />
+                    <span className="flex-1 text-left">Assign to {dept?.head||'Dept Head'}</span>
+                    <i className="fas fa-arrow-right opacity-70 text-sm" />
+                  </button>
+                </div>
               )}
             </div>
 
-            <div>
-              <p className={`text-xs font-bold mb-3 ${dark ? 'text-slate-400' : 'text-slate-500'}`}>Update Status</p>
+            {/* Status Update */}
+            <div className={`rounded-2xl border p-5 shadow-sm ${card(dark)}`}>
+              <p className={`text-[10px] font-black uppercase tracking-widest mb-3 ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Update Status</p>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { label: 'Pending', icon: 'fa-clock', color: '#d97706', activeClass: 'border-amber-400 bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow-lg shadow-amber-200' },
-                  { label: 'In Progress', icon: 'fa-arrows-rotate', color: '#2563eb', activeClass: 'border-blue-500 bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-200' },
-                  { label: 'Resolved', icon: 'fa-circle-check', color: '#059669', activeClass: 'border-green-500 bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-200' },
+                  { label: 'Pending',     icon: 'fa-clock',         color: '#d97706', shadow: 'shadow-amber-200',  grad: 'from-amber-400 to-amber-500' },
+                  { label: 'In Progress', icon: 'fa-arrows-rotate', color: '#2563eb', shadow: 'shadow-blue-200',   grad: 'from-blue-500 to-blue-600' },
+                  { label: 'Resolved',    icon: 'fa-circle-check',  color: '#059669', shadow: 'shadow-green-200',  grad: 'from-emerald-500 to-emerald-600' },
                 ].map(s => {
                   const isActive = complaint.status === s.label;
                   return (
-                    <button
-                      key={s.label}
-                      disabled={isActive}
+                    <button key={s.label} disabled={isActive}
                       onClick={() => askConfirm({
-                        title: 'Confirm status update',
-                        message: `Change complaint status from ${complaint.status} to ${s.label}?`,
-                        confirmText: `Update to ${s.label}`,
+                        title: 'Update Status?',
+                        message: `Change status from "${complaint.status}" to "${s.label}"?`,
+                        confirmText: `Set ${s.label}`,
                         icon: s.icon,
                         color: s.color,
                         onConfirm: () => onStatusChange(complaint._id, s.label),
                       })}
-                      className={`flex flex-col items-center gap-2 py-4 rounded-2xl border-2 text-xs font-black transition-all active:scale-95 ${
+                      className={`flex flex-col items-center gap-2 py-4 rounded-xl border-2 text-xs font-black transition-all active:scale-95 ${
                         isActive
-                          ? s.activeClass
+                          ? `bg-gradient-to-br ${s.grad} text-white border-transparent shadow-lg ${s.shadow}`
                           : dark
                             ? 'border-slate-700 text-slate-400 hover:border-slate-500 hover:bg-slate-800'
                             : 'border-slate-200 text-slate-400 hover:border-slate-300 hover:bg-slate-50'
@@ -335,87 +418,89 @@ function ComplaintDetail({ complaint, dark, onClose, onStatusChange, onAssign, o
         )}
       </div>
 
-      {/* Timeline */}
-      <div className={`rounded-3xl border p-6 shadow-sm ${card(dark)}`}>
-        <p className={`text-[10px] font-black uppercase tracking-widest mb-6 ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Activity Timeline</p>
-        <div className="space-y-0">
-          {complaint.timeline.map((t, i) => (
-            <div key={i} className="flex gap-4 items-start">
-              <div className="flex flex-col items-center flex-shrink-0">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center shadow-sm" style={{ background: `${t.color}20`, border: `2px solid ${t.color}40` }}>
-                  <i className={`fas ${t.icon} text-sm`} style={{ color: t.color }} />
-                </div>
-                {i < complaint.timeline.length - 1 && (
-                  <div className={`w-0.5 my-2 ${dark ? 'bg-slate-700' : 'bg-slate-100'}`} style={{ minHeight: 24 }} />
-                )}
-              </div>
-              <div className="flex-1 pb-5">
-                <p className={`text-sm font-bold ${dark ? 'text-slate-200' : 'text-slate-800'}`}>{t.event}</p>
-                <p className={`text-xs mt-0.5 ${dark ? 'text-slate-500' : 'text-slate-400'}`}>{t.time}</p>
-              </div>
-            </div>
-          ))}
+      {/* ── Activity Timeline (full width, bottom) ── */}
+      <div className={`rounded-2xl border p-6 shadow-sm ${card(dark)}`}>
+        <div className="flex items-center gap-2.5 mb-6">
+          <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${dark ? 'bg-slate-700' : 'bg-slate-100'}`}>
+            <i className={`fas fa-timeline text-xs ${dark ? 'text-slate-400' : 'text-slate-500'}`} />
+          </div>
+          <p className={`text-[10px] font-black uppercase tracking-widest ${dark ? 'text-slate-500' : 'text-slate-400'}`}>Activity Timeline</p>
+          <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full ${dark ? 'bg-slate-700 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
+            {complaint.timeline?.length || 0} events
+          </span>
         </div>
+
+        {complaint.timeline?.length > 0 ? (
+          <div className="relative">
+            <div className={`absolute left-[17px] top-0 bottom-0 w-0.5 ${dark ? 'bg-slate-700' : 'bg-slate-100'}`} />
+            <div className="space-y-0">
+              {complaint.timeline.map((t, i) => (
+                <div key={i} className="flex gap-4 items-start relative">
+                  <div className="flex-shrink-0 z-10">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center shadow-sm"
+                      style={{ background: `${t.color}18`, border: `2px solid ${t.color}50` }}>
+                      <i className={`fas ${t.icon} text-xs`} style={{ color: t.color }} />
+                    </div>
+                  </div>
+                  <div className={`flex-1 pb-6 ${i === complaint.timeline.length - 1 ? 'pb-0' : ''}`}>
+                    <div className={`rounded-xl p-3 ${
+                      i === 0
+                        ? (dark ? 'bg-slate-800 border border-slate-700' : 'bg-slate-50 border border-slate-100')
+                        : ''
+                    }`}>
+                      <p className={`text-sm font-bold ${dark ? 'text-slate-200' : 'text-slate-800'}`}>{t.event}</p>
+                      <p className={`text-[10px] mt-0.5 font-medium ${dark ? 'text-slate-500' : 'text-slate-400'}`}>
+                        <i className="fas fa-clock mr-1" />{t.time}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className={`text-xs text-center py-4 ${dark ? 'text-slate-600' : 'text-slate-400'}`}>No activity recorded yet.</p>
+        )}
       </div>
 
+      {/* ── Image Lightbox ── */}
       {imageOpen && complaint.image && (
-        <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
-          onClick={() => setImageOpen(false)}
-          role="dialog"
-          aria-modal="true"
-        >
-          <button
-            className="absolute right-5 top-5 w-11 h-11 rounded-full bg-white text-black flex items-center justify-center"
-            aria-label="Close image"
-            onClick={(e) => { e.stopPropagation(); setImageOpen(false); }}
-          >
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+          onClick={() => setImageOpen(false)} role="dialog" aria-modal="true">
+          <button className="absolute right-5 top-5 w-11 h-11 rounded-full bg-white text-black flex items-center justify-center"
+            onClick={(e) => { e.stopPropagation(); setImageOpen(false); }}>
             <i className="fas fa-xmark" />
           </button>
-          <img src={complaint.image} alt={complaint.title} className="max-h-[88vh] max-w-full rounded-2xl object-contain shadow-2xl" onClick={e => e.stopPropagation()} />
+          <img src={complaint.image} alt={complaint.title}
+            className="max-h-[88vh] max-w-full rounded-2xl object-contain shadow-2xl"
+            onClick={e => e.stopPropagation()} />
         </div>
       )}
 
+      {/* ── Confirm Dialog ── */}
       {confirmAction && (
-        <div
-          className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          onClick={closeConfirm}
-        >
-          <div
-            className={`w-full max-w-sm rounded-3xl border p-5 shadow-2xl ${dark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-100 text-slate-900'}`}
-            onClick={(event) => event.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+          role="dialog" aria-modal="true" onClick={closeConfirm}>
+          <div className={`w-full max-w-sm rounded-3xl border p-5 shadow-2xl ${dark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-100 text-slate-900'}`}
+            onClick={e => e.stopPropagation()}>
             <div className="flex items-start gap-4">
-              <div
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg"
-                style={{ background: `linear-gradient(135deg, ${confirmAction.color}, ${confirmAction.color}bb)` }}
-              >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg"
+                style={{ background: `linear-gradient(135deg,${confirmAction.color},${confirmAction.color}bb)` }}>
                 <i className={`fas ${confirmAction.icon} text-base`} />
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-base font-black leading-tight">{confirmAction.title}</h3>
-                <p className={`mt-1 text-sm leading-relaxed ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
-                  {confirmAction.message}
-                </p>
+                <p className={`mt-1 text-sm leading-relaxed ${dark ? 'text-slate-400' : 'text-slate-500'}`}>{confirmAction.message}</p>
               </div>
             </div>
-
             <div className="mt-5 flex gap-3">
-              <button
-                type="button"
-                onClick={closeConfirm}
-                className={`flex-1 rounded-2xl px-4 py-3 text-sm font-black transition-all active:scale-95 ${dark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-              >
+              <button type="button" onClick={closeConfirm}
+                className={`flex-1 rounded-2xl px-4 py-3 text-sm font-black transition-all active:scale-95 ${dark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                 Cancel
               </button>
-              <button
-                type="button"
-                onClick={runConfirmedAction}
+              <button type="button" onClick={runConfirmedAction}
                 className="flex-1 rounded-2xl px-4 py-3 text-sm font-black text-white shadow-lg transition-all active:scale-95"
-                style={{ background: `linear-gradient(135deg, ${confirmAction.color}, ${confirmAction.color}bb)` }}
-              >
+                style={{ background: `linear-gradient(135deg,${confirmAction.color},${confirmAction.color}bb)` }}>
                 {confirmAction.confirmText}
               </button>
             </div>
