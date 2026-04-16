@@ -633,7 +633,7 @@ export default function AdminDashboard() {
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
 
-      <AdminSidebar activeTab={activeTab} setActiveTab={setTab} dark={dark} />
+      <AdminSidebar activeTab={activeTab} setActiveTab={setTab} dark={dark} onToggleDark={() => setDark(!dark)} />
 
       <div className="flex-1 flex flex-col min-h-screen lg:ml-[240px]">
         <header className={`sticky top-0 z-20 border-b px-5 lg:px-8 py-4 flex items-center justify-between shadow-sm transition-colors duration-300 ${headerBg}`}>

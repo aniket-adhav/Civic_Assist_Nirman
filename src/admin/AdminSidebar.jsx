@@ -7,7 +7,7 @@ const NAV = [
   { id: 'admin', icon: 'fa-user-shield', label: 'Admin' },
 ];
 
-export default function AdminSidebar({ activeTab, setActiveTab, dark }) {
+export default function AdminSidebar({ activeTab, setActiveTab, dark, onToggleDark }) {
   const { navigateTo } = useApp();
 
   const bg = dark ? 'bg-[#0f172a] border-slate-700' : 'bg-white border-slate-100';
@@ -67,6 +67,15 @@ export default function AdminSidebar({ activeTab, setActiveTab, dark }) {
           </div>
           <span className="text-sm font-semibold">Settings</span>
           {activeTab === 'settings' && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70" />}
+        </button>
+        <button
+          onClick={onToggleDark}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${inactiveBtn}`}
+        >
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${dark ? 'bg-slate-800' : 'bg-slate-100'}`}>
+            <i className={`fas ${dark ? 'fa-sun text-yellow-400' : 'fa-moon text-slate-500'} text-sm`} />
+          </div>
+          <span className="text-sm font-semibold">{dark ? 'Light Mode' : 'Dark Mode'}</span>
         </button>
         <button
           onClick={() => navigateTo('login')}
