@@ -41,3 +41,11 @@ externalPort = 80
 deploymentTarget = "autoscale"
 run = ["bash", "-c", "node backend/server.js & npx serve dist -l 5000 -s"]
 build = ["npm", "run", "build"]
+
+[userenv]
+
+[userenv.shared]
+MONGODB_URI = "mongodb+srv://aniketadhav022_db_user:Ani%401234@cluster0.cnuh57n.mongodb.net/test?retryWrites=true&w=majority"
+CLOUDINARY_CLOUD_NAME = "dwdvbu9b0"
+CLOUDINARY_API_KEY = "952861867135624"
+CLOUDINARY_API_SECRET = "Dk8rdK4_3VcS0qxc76EvYVftCkA"
