@@ -57,20 +57,36 @@ function DonutRing({ pct, color, size = 88, stroke = 11, dark }) {
   );
 }
 
-function ScoreBar({ label, value, dark }) {
-  const pct = Math.round((value ?? 0.5) * 100);
-  const color = pct >= 60 ? '#059669' : pct >= 40 ? '#f59e0b' : '#ef4444';
+function ScoreCard({ label, value, icon, dark, large = false }) {
+  const pct = Math.round((value ?? 0) * 100);
+  const isGood   = pct >= 60;
+  const isMid    = pct >= 35 && pct < 60;
+  const color    = isGood ? '#059669' : isMid ? '#d97706' : '#dc2626';
+  const bgLight  = isGood ? 'bg-emerald-50 border-emerald-200' : isMid ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200';
+  const bgDark   = isGood ? 'bg-emerald-900/20 border-emerald-700/40' : isMid ? 'bg-amber-900/20 border-amber-700/40' : 'bg-red-900/20 border-red-700/40';
+  const verdict  = isGood ? 'Genuine' : isMid ? 'Uncertain' : 'Suspicious';
+  const vBg      = isGood
+    ? (dark ? 'bg-emerald-800/40 text-emerald-300' : 'bg-emerald-100 text-emerald-700')
+    : isMid
+      ? (dark ? 'bg-amber-800/40 text-amber-300' : 'bg-amber-100 text-amber-700')
+      : (dark ? 'bg-red-800/40 text-red-300' : 'bg-red-100 text-red-700');
+
   return (
-    <div className="space-y-1.5">
-      <div className="flex justify-between items-center">
-        <span className={`text-[10px] font-black uppercase tracking-widest ${dark ? 'text-slate-500' : 'text-slate-400'}`}>{label}</span>
-        <span className="text-xs font-black" style={{ color }}>{typeof value === 'number' ? value.toFixed(3) : '--'}</span>
+    <div className={`rounded-2xl border p-4 flex flex-col gap-2 transition-all ${dark ? bgDark : bgLight} ${large ? 'col-span-full' : ''}`}>
+      <div className="flex items-center justify-between">
+        <div className={`w-7 h-7 rounded-lg flex items-center justify-center`} style={{ background: `${color}22` }}>
+          <i className={`fas ${icon} text-xs`} style={{ color }} />
+        </div>
+        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${vBg}`}>{verdict}</span>
       </div>
-      <div className={`w-full h-2 rounded-full overflow-hidden ${dark ? 'bg-slate-700' : 'bg-slate-100'}`}>
-        <div
-          className="h-full rounded-full transition-all duration-700"
-          style={{ width: `${pct}%`, background: color }}
-        />
+      <div>
+        <p className="text-2xl font-black leading-none" style={{ color }}>
+          {typeof value === 'number' ? value.toFixed(3) : '--'}
+        </p>
+        <p className={`text-[10px] font-black uppercase tracking-widest mt-1 ${dark ? 'text-slate-500' : 'text-slate-400'}`}>{label}</p>
+      </div>
+      <div className={`w-full h-1.5 rounded-full overflow-hidden ${dark ? 'bg-slate-700/60' : 'bg-white/70'}`}>
+        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, background: color }} />
       </div>
     </div>
   );
@@ -195,14 +211,15 @@ function ComplaintDetail({ complaint, dark, onClose, onStatusChange, onAssign, o
 
             {hasAI ? (
               <div className="space-y-3">
-                <ScoreBar label="Text Score" value={complaint.aiAnalysis.textScore} dark={dark} />
-                <ScoreBar label="Image Score" value={complaint.aiAnalysis.imageScore} dark={dark} />
-                <div className={`h-px ${dark ? 'bg-slate-700' : 'bg-slate-200'}`} />
-                <ScoreBar label="Final Authenticity Score" value={complaint.aiAnalysis.finalScore} dark={dark} />
-                <p className={`text-[10px] leading-relaxed ${dark ? 'text-slate-500' : 'text-slate-400'}`}>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <ScoreCard label="Text Score"  value={complaint.aiAnalysis.textScore}  icon="fa-align-left"     dark={dark} />
+                  <ScoreCard label="Image Score" value={complaint.aiAnalysis.imageScore} icon="fa-image"          dark={dark} />
+                  <ScoreCard label="Final Score (Authenticity)" value={complaint.aiAnalysis.finalScore} icon="fa-shield-halved" dark={dark} large />
+                </div>
+                <p className={`text-[10px] leading-relaxed pt-1 ${dark ? 'text-slate-500' : 'text-slate-400'}`}>
                   {isSpam
-                    ? 'Score below 0.5 — image and description appear mismatched or irrelevant to the reported category.'
-                    : 'Score above 0.5 — content matches the reported category and appears genuine.'}
+                    ? 'Final score below 0.5 — text or image did not match the reported issue category.'
+                    : 'Final score above 0.5 — content aligns with the reported category and appears genuine.'}
                 </p>
               </div>
             ) : (
