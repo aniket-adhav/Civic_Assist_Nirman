@@ -650,14 +650,6 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setDark(!dark)}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${dark ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-              title={dark ? 'Light mode' : 'Dark mode'}
-            >
-              <i className={`fas ${dark ? 'fa-sun' : 'fa-moon'} text-sm`} />
-            </button>
-
             <div className="relative" ref={notifsRef}>
               <button
                 onClick={() => setShowNotifs(v => !v)}
