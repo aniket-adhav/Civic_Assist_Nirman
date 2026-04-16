@@ -96,7 +96,14 @@ export default function ChatBot() {
   const [messages, setMessages] = useState([]);
   const [currentFlow, setCurrentFlow] = useState('start');
   const [showOptions, setShowOptions] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const bottomRef = useRef(null);
+
+  useEffect(() => {
+    const update = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
   useEffect(() => {
     if (open && messages.length === 0) {
@@ -135,7 +142,7 @@ export default function ChatBot() {
   return (
     <>
       {/* Floating button */}
-      <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+      <div style={{ position: 'fixed', bottom: isMobile ? '76px' : '24px', right: '24px', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
 
         {/* Hover speech bubble */}
         <AnimatePresence>
@@ -207,8 +214,8 @@ export default function ChatBot() {
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 300, damping: 28 }}
             style={{
-              position: 'fixed', bottom: '88px', right: '24px', zIndex: 999,
-              width: '330px', maxHeight: '480px',
+              position: 'fixed', bottom: isMobile ? '144px' : '88px', right: isMobile ? '12px' : '24px', zIndex: 999,
+              width: isMobile ? 'calc(100vw - 24px)' : '330px', maxWidth: '330px', maxHeight: isMobile ? '60vh' : '480px',
               borderRadius: '18px', overflow: 'hidden',
               background: 'hsl(var(--card))',
               border: '1px solid hsl(var(--border))',
