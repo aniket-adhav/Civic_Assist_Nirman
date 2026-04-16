@@ -318,13 +318,20 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <p style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: '0.65rem',
-            color: 'rgba(255,255,255,0.3)',
-            letterSpacing: '0.04em',
-            marginTop: 'auto',
-          }}>© 2026 CivicAssist · Powered by Citizen Participation</p>
+          <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{
+              width: '6px', height: '6px', borderRadius: '50%',
+              background: '#22c55e',
+              boxShadow: '0 0 6px rgba(34,197,94,0.7)',
+              flexShrink: 0,
+            }} />
+            <span style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: '0.65rem',
+              color: 'rgba(255,255,255,0.38)',
+              letterSpacing: '0.06em',
+            }}>All systems operational · Reports processed in real time</span>
+          </div>
         </div>
       </div>
 
