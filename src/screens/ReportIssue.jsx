@@ -8,15 +8,16 @@ import { useLanguage } from '../context/LanguageContext';
 function useSpeechInput(onResult) {
   const [listening, setListening] = useState(false);
   const [interim, setInterim] = useState('');
-  const recogRef    = useRef(null);
+  const [micError, setMicError] = useState('');
   const activeRef   = useRef(false);
+  const recogRef    = useRef(null);
   const onResultRef = useRef(onResult);
   useEffect(() => { onResultRef.current = onResult; }, [onResult]);
 
   const supported = typeof window !== 'undefined' &&
     !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 
-  const createAndStart = useCallback(() => {
+  const spawnRecog = useCallback(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recog = new SR();
     recog.lang = 'en-IN';
@@ -25,44 +26,51 @@ function useSpeechInput(onResult) {
     recog.maxAlternatives = 1;
 
     recog.onresult = (e) => {
-      let finalText = '';
-      let interimText = '';
+      let final = '', interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) finalText += t;
-        else interimText += t;
+        if (e.results[i].isFinal) final += t;
+        else interim += t;
       }
-      if (finalText) { onResultRef.current(finalText.trim()); setInterim(''); }
-      else setInterim(interimText);
+      if (final) { onResultRef.current(final.trim()); setInterim(''); }
+      else setInterim(interim);
     };
 
     recog.onerror = (e) => {
-      if (e.error === 'aborted') return;
+      if (e.error === 'aborted' || e.error === 'no-speech') return;
       activeRef.current = false;
       setListening(false);
       setInterim('');
+      if (e.error === 'not-allowed') {
+        setMicError('Microphone access was denied. Please allow mic permission and try again.');
+      } else if (e.error === 'network') {
+        setMicError('Network error — please check your connection and try again.');
+      } else {
+        setMicError(`Mic error: ${e.error}`);
+      }
     };
 
     recog.onend = () => {
       if (activeRef.current) {
-        try { recog.start(); } catch { /* ignore */ }
+        recogRef.current = spawnRecog();
       } else {
         setListening(false);
         setInterim('');
       }
     };
 
-    recogRef.current = recog;
-    recog.start();
+    try { recog.start(); } catch { /* ignore double-start */ }
+    return recog;
   }, []);
 
   const start = useCallback(() => {
     if (!supported || activeRef.current) return;
+    setMicError('');
     activeRef.current = true;
     setListening(true);
     setInterim('');
-    createAndStart();
-  }, [supported, createAndStart]);
+    recogRef.current = spawnRecog();
+  }, [supported, spawnRecog]);
 
   const stop = useCallback(() => {
     activeRef.current = false;
@@ -78,10 +86,10 @@ function useSpeechInput(onResult) {
 
   useEffect(() => () => {
     activeRef.current = false;
-    try { recogRef.current?.stop(); } catch { /* ignore */ }
+    try { recogRef.current?.abort(); } catch { /* ignore */ }
   }, []);
 
-  return { listening, interim, toggle, supported };
+  return { listening, interim, toggle, supported, micError };
 }
 
 function MicButton({ listening, onClick, supported, small = false }) {
@@ -363,6 +371,12 @@ export default function ReportIssue() {
               Recording… speak your issue title, tap stop when done
             </p>
           )}
+          {titleVoice.micError && (
+            <p className="text-xs text-orange-500 mt-1 flex items-center gap-1.5">
+              <i className="fas fa-triangle-exclamation" />
+              {titleVoice.micError}
+            </p>
+          )}
           {errors.title && <p className="text-xs text-destructive mt-1">{errors.title}</p>}
         </div>
 
@@ -395,6 +409,12 @@ export default function ReportIssue() {
               />
             </div>
           </div>
+          {descVoice.micError && (
+            <p className="text-xs text-orange-500 mt-1 flex items-center gap-1.5">
+              <i className="fas fa-triangle-exclamation" />
+              {descVoice.micError}
+            </p>
+          )}
           {errors.description && <p className="text-xs text-destructive mt-1">{errors.description}</p>}
         </div>
 
