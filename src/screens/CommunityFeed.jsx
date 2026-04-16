@@ -306,9 +306,9 @@ export default function CommunityFeed() {
   return (
     <div className="animate-fadeIn">
 
-      {/* Search */}
-      <div className="mb-5">
-        <div className="relative">
+      {/* Search + Report row */}
+      <div className="mb-5 flex items-center gap-3">
+        <div className="relative flex-1">
           <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm" />
           <input
             type="text"
@@ -318,6 +318,14 @@ export default function CommunityFeed() {
             className="w-full pl-11 pr-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
           />
         </div>
+        <button
+          onClick={() => navigateTo('report')}
+          className="flex items-center gap-2 px-4 py-3 rounded-xl text-primary-foreground text-sm font-semibold whitespace-nowrap shrink-0 hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200"
+          style={{ background: 'var(--gradient-primary)', boxShadow: 'var(--shadow-lg)' }}
+        >
+          <i className="fas fa-plus text-xs" />
+          <span>{t('feed.reportIssue')}</span>
+        </button>
       </div>
 
       {/* Trending */}
@@ -365,15 +373,6 @@ export default function CommunityFeed() {
         </div>
       )}
 
-      {/* FAB */}
-      <button
-        onClick={() => navigateTo('report')}
-        className="fixed right-6 z-40 flex items-center gap-2 px-5 py-3.5 rounded-2xl text-primary-foreground text-sm font-semibold shadow-lg hover:-translate-y-0.5 transition-all duration-200 md:rounded-full"
-        style={{ bottom: '24px', background:'var(--gradient-primary)', boxShadow:'var(--shadow-lg)' }}
-      >
-        <i className="fas fa-plus" />
-        <span className="hidden md:inline">{t('feed.reportIssue')}</span>
-      </button>
 
       {commentIssue && <CommentModal issue={commentIssue} onClose={() => setCommentIssue(null)} />}
     </div>
