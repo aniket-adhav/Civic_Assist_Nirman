@@ -23,9 +23,9 @@ function AnimatedHero() {
           display: 'inline-block',
           background: 'linear-gradient(120deg, rgba(255,255,255,0.06) 0%, rgba(147,197,253,0.10) 50%, rgba(96,165,250,0.07) 100%)',
           borderRadius: '10px',
-          padding: '5px 18px 9px 14px',
+          padding: '10px 18px 14px 14px',
           border: '1px solid rgba(147,197,253,0.12)',
-          overflow: 'hidden',
+          overflow: 'visible',
         }}>
           <h1 style={{
             fontFamily: "'Boldonse', cursive",
