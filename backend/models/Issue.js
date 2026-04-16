@@ -54,10 +54,10 @@ const issueSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
-issueSchema.pre('save', async function () {
+issueSchema.pre('save', function () {
   if (!this.complaintId) {
-    const count = await mongoose.model('Issue').countDocuments();
-    this.complaintId = `#C${String(count + 1).padStart(3, '0')}`;
+    // Use the last 5 hex chars of the ObjectId — always unique, no DB query needed
+    this.complaintId = `#C${this._id.toString().slice(-5).toUpperCase()}`;
   }
 });
 
