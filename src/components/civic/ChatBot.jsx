@@ -139,7 +139,7 @@ export default function ChatBot() {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
         style={{
-          position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000,
+          position: 'fixed', bottom: '88px', right: '24px', zIndex: 1000,
           width: '52px', height: '52px', borderRadius: '50%', border: 'none', cursor: 'pointer',
           background: 'linear-gradient(135deg, #0d9488 0%, #0891b2 100%)',
           boxShadow: '0 4px 20px rgba(13,148,136,0.5)',
@@ -176,7 +176,7 @@ export default function ChatBot() {
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 300, damping: 28 }}
             style={{
-              position: 'fixed', bottom: '88px', right: '24px', zIndex: 999,
+              position: 'fixed', bottom: '154px', right: '24px', zIndex: 999,
               width: '330px', maxHeight: '480px',
               borderRadius: '18px', overflow: 'hidden',
               background: 'hsl(var(--card))',

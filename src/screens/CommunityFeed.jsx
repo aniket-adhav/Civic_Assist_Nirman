@@ -369,7 +369,7 @@ export default function CommunityFeed() {
       <button
         onClick={() => navigateTo('report')}
         className="fixed right-6 z-40 flex items-center gap-2 px-5 py-3.5 rounded-2xl text-primary-foreground text-sm font-semibold shadow-lg hover:-translate-y-0.5 transition-all duration-200 md:rounded-full"
-        style={{ bottom: '88px', background:'var(--gradient-primary)', boxShadow:'var(--shadow-lg)' }}
+        style={{ bottom: '24px', background:'var(--gradient-primary)', boxShadow:'var(--shadow-lg)' }}
       >
         <i className="fas fa-plus" />
         <span className="hidden md:inline">{t('feed.reportIssue')}</span>
