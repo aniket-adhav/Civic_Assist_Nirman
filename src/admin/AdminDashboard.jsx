@@ -62,11 +62,19 @@ function ComplaintDetail({ complaint, dark, onClose, onStatusChange, onAssign, o
   const isAssigned = !!complaint.assignedTo;
   const isSpam = !!complaint.aiAnalysis?.isSpam;
   const [imageOpen, setImageOpen] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
 
   const statusGrad = {
     Pending:      'bg-amber-100 text-amber-700',
     'In Progress': 'bg-blue-100 text-blue-700',
     Resolved:     'bg-emerald-100 text-emerald-700',
+  };
+
+  const askConfirm = (action) => setConfirmAction(action);
+  const closeConfirm = () => setConfirmAction(null);
+  const runConfirmedAction = () => {
+    confirmAction?.onConfirm?.();
+    setConfirmAction(null);
   };
 
   return (
@@ -144,7 +152,14 @@ function ComplaintDetail({ complaint, dark, onClose, onStatusChange, onAssign, o
             <div className="flex items-center justify-between gap-3 mb-3">
               <p className={`text-[10px] font-black uppercase tracking-widest ${dark ? 'text-slate-500' : 'text-slate-400'}`}>AI Authenticity Scores</p>
               <button
-                onClick={() => onReanalyze(complaint._id)}
+                onClick={() => askConfirm({
+                  title: 'Re-run AI scan?',
+                  message: 'This will analyze the complaint again and update the authenticity result.',
+                  confirmText: 'Run Scan',
+                  icon: 'fa-rotate-right',
+                  color: '#2563eb',
+                  onConfirm: () => onReanalyze(complaint._id),
+                })}
                 className={`text-[10px] font-black px-2.5 py-1 rounded-lg transition-colors ${
                   dark ? 'bg-slate-900 text-blue-300 hover:bg-slate-700' : 'bg-white text-blue-600 hover:bg-blue-50'
                 }`}
@@ -257,7 +272,14 @@ function ComplaintDetail({ complaint, dark, onClose, onStatusChange, onAssign, o
                 </div>
               ) : (
                 <button
-                  onClick={() => onAssign(complaint._id, dept?.head)}
+                  onClick={() => askConfirm({
+                    title: 'Confirm department assignment',
+                    message: `Assign this complaint to ${dept?.head || 'the department head'} from ${dept?.dept || 'the selected department'}?`,
+                    confirmText: 'Assign Department',
+                    icon: 'fa-user-check',
+                    color: dept?.color || '#2563eb',
+                    onConfirm: () => onAssign(complaint._id, dept?.head),
+                  })}
                   className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-white font-bold shadow-lg active:scale-95 transition-all"
                   style={{ background: `linear-gradient(135deg, ${dept?.color || '#2563eb'}, ${dept?.color || '#2563eb'}aa)` }}
                 >
@@ -286,7 +308,14 @@ function ComplaintDetail({ complaint, dark, onClose, onStatusChange, onAssign, o
                     <button
                       key={s.label}
                       disabled={isActive}
-                      onClick={() => onStatusChange(complaint._id, s.label)}
+                      onClick={() => askConfirm({
+                        title: 'Confirm status update',
+                        message: `Change complaint status from ${complaint.status} to ${s.label}?`,
+                        confirmText: `Update to ${s.label}`,
+                        icon: s.icon,
+                        color: s.color,
+                        onConfirm: () => onStatusChange(complaint._id, s.label),
+                      })}
                       className={`flex flex-col items-center gap-2 py-4 rounded-2xl border-2 text-xs font-black transition-all active:scale-95 ${
                         isActive
                           ? s.activeClass
@@ -344,6 +373,53 @@ function ComplaintDetail({ complaint, dark, onClose, onStatusChange, onAssign, o
             <i className="fas fa-xmark" />
           </button>
           <img src={complaint.image} alt={complaint.title} className="max-h-[88vh] max-w-full rounded-2xl object-contain shadow-2xl" onClick={e => e.stopPropagation()} />
+        </div>
+      )}
+
+      {confirmAction && (
+        <div
+          className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          onClick={closeConfirm}
+        >
+          <div
+            className={`w-full max-w-sm rounded-3xl border p-5 shadow-2xl ${dark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-100 text-slate-900'}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-lg"
+                style={{ background: `linear-gradient(135deg, ${confirmAction.color}, ${confirmAction.color}bb)` }}
+              >
+                <i className={`fas ${confirmAction.icon} text-base`} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-black leading-tight">{confirmAction.title}</h3>
+                <p className={`mt-1 text-sm leading-relaxed ${dark ? 'text-slate-400' : 'text-slate-500'}`}>
+                  {confirmAction.message}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex gap-3">
+              <button
+                type="button"
+                onClick={closeConfirm}
+                className={`flex-1 rounded-2xl px-4 py-3 text-sm font-black transition-all active:scale-95 ${dark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={runConfirmedAction}
+                className="flex-1 rounded-2xl px-4 py-3 text-sm font-black text-white shadow-lg transition-all active:scale-95"
+                style={{ background: `linear-gradient(135deg, ${confirmAction.color}, ${confirmAction.color}bb)` }}
+              >
+                {confirmAction.confirmText}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
