@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const FLOWS = {
@@ -92,6 +92,7 @@ const FLOWS = {
 
 export default function ChatBot() {
   const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const [messages, setMessages] = useState([]);
   const [currentFlow, setCurrentFlow] = useState('start');
   const [showOptions, setShowOptions] = useState(false);
@@ -133,39 +134,69 @@ export default function ChatBot() {
 
   return (
     <>
-      {/* Floating button — teal, sits at bottom */}
-      <motion.button
-        onClick={() => setOpen(o => !o)}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.94 }}
-        style={{
-          position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000,
-          width: '52px', height: '52px', borderRadius: '50%', border: 'none', cursor: 'pointer',
-          background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-          boxShadow: '0 4px 20px rgba(99,102,241,0.45)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}
-        aria-label="Open help chat"
-      >
-        <AnimatePresence mode="wait">
-          {open ? (
-            <motion.i key="close" className="fas fa-times"
-              initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.2 }} style={{ color: '#fff', fontSize: '1rem' }} />
-          ) : (
-            <motion.i key="chat" className="fas fa-comment-dots"
-              initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }}
-              transition={{ duration: 0.2 }} style={{ color: '#fff', fontSize: '1.1rem' }} />
+      {/* Floating button */}
+      <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+
+        {/* Hover speech bubble */}
+        <AnimatePresence>
+          {hovered && !open && (
+            <motion.div
+              initial={{ opacity: 0, y: 6, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 6, scale: 0.92 }}
+              transition={{ duration: 0.18 }}
+              style={{
+                background: 'hsl(var(--card))',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '14px 14px 4px 14px',
+                padding: '8px 13px',
+                fontSize: '0.76rem',
+                fontWeight: 500,
+                color: 'hsl(var(--foreground))',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                whiteSpace: 'nowrap',
+                position: 'relative',
+              }}
+            >
+              💬 Any query? Ask me!
+            </motion.div>
           )}
         </AnimatePresence>
-        {!open && (
-          <motion.div
-            animate={{ scale: [1, 1.5, 1], opacity: [1, 0.3, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            style={{ position: 'absolute', top: '2px', right: '2px', width: '10px', height: '10px', borderRadius: '50%', background: '#fbbf24', border: '2px solid white' }}
-          />
-        )}
-      </motion.button>
+
+        <motion.button
+          onClick={() => setOpen(o => !o)}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.94 }}
+          style={{
+            width: '58px', height: '58px', borderRadius: '50%', border: 'none', cursor: 'pointer',
+            background: 'var(--gradient-primary)',
+            boxShadow: '0 4px 20px rgba(59,130,246,0.45)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+          aria-label="Open help chat"
+        >
+          <AnimatePresence mode="wait">
+            {open ? (
+              <motion.i key="close" className="fas fa-times"
+                initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.2 }} style={{ color: '#fff', fontSize: '1.15rem' }} />
+            ) : (
+              <motion.i key="chat" className="fas fa-robot"
+                initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }}
+                transition={{ duration: 0.2 }} style={{ color: '#fff', fontSize: '1.4rem' }} />
+            )}
+          </AnimatePresence>
+          {!open && (
+            <motion.div
+              animate={{ scale: [1, 1.5, 1], opacity: [1, 0.3, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              style={{ position: 'absolute', top: '3px', right: '3px', width: '11px', height: '11px', borderRadius: '50%', background: '#fbbf24', border: '2px solid white' }}
+            />
+          )}
+        </motion.button>
+      </div>
 
       {/* Chat window — opens above both buttons */}
       <AnimatePresence>
@@ -188,7 +219,7 @@ export default function ChatBot() {
             {/* Header */}
             <div style={{
               padding: '13px 16px',
-              background: 'linear-gradient(135deg, #4338ca 0%, #6366f1 100%)',
+              background: 'var(--gradient-primary)',
               display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0,
             }}>
               <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -217,7 +248,7 @@ export default function ChatBot() {
                     style={{ display: 'flex', justifyContent: msg.type === 'user' ? 'flex-end' : 'flex-start', gap: '7px', alignItems: 'flex-end' }}
                   >
                     {msg.type === 'bot' && (
-                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginBottom: '2px' }}>
+                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'var(--gradient-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginBottom: '2px' }}>
                         <i className="fas fa-robot" style={{ color: '#fff', fontSize: '0.62rem' }} />
                       </div>
                     )}
@@ -226,7 +257,7 @@ export default function ChatBot() {
                       padding: '9px 13px',
                       borderRadius: msg.type === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                       background: msg.type === 'user'
-                        ? 'linear-gradient(135deg, #6366f1, #4f46e5)'
+                        ? 'var(--gradient-primary)'
                         : 'hsl(var(--muted))',
                       color: msg.type === 'user' ? '#fff' : 'hsl(var(--foreground))',
                       fontSize: '0.77rem',
@@ -262,7 +293,7 @@ export default function ChatBot() {
                           textAlign: 'left', cursor: 'pointer',
                           transition: 'all 0.15s',
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.08)'; e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.color = '#6366f1'; }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.08)'; e.currentTarget.style.borderColor = 'hsl(217,91%,60%)'; e.currentTarget.style.color = 'hsl(217,91%,60%)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'hsl(var(--background))'; e.currentTarget.style.borderColor = 'hsl(var(--border))'; e.currentTarget.style.color = 'hsl(var(--foreground))'; }}
                       >
                         {opt.label}
