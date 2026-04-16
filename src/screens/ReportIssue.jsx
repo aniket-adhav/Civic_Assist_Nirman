@@ -8,18 +8,21 @@ import { useLanguage } from '../context/LanguageContext';
 function useSpeechInput(onResult) {
   const [listening, setListening] = useState(false);
   const [interim, setInterim] = useState('');
-  const recogRef = useRef(null);
+  const recogRef    = useRef(null);
+  const activeRef   = useRef(false);
+  const onResultRef = useRef(onResult);
+  useEffect(() => { onResultRef.current = onResult; }, [onResult]);
 
   const supported = typeof window !== 'undefined' &&
     !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 
-  const start = useCallback(() => {
-    if (!supported || listening) return;
+  const createAndStart = useCallback(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recog = new SR();
     recog.lang = 'en-IN';
     recog.continuous = true;
     recog.interimResults = true;
+    recog.maxAlternatives = 1;
 
     recog.onresult = (e) => {
       let finalText = '';
@@ -29,29 +32,54 @@ function useSpeechInput(onResult) {
         if (e.results[i].isFinal) finalText += t;
         else interimText += t;
       }
-      if (finalText) { onResult(finalText); setInterim(''); }
+      if (finalText) { onResultRef.current(finalText.trim()); setInterim(''); }
       else setInterim(interimText);
     };
 
-    recog.onerror = () => { setListening(false); setInterim(''); };
-    recog.onend   = () => { setListening(false); setInterim(''); };
+    recog.onerror = (e) => {
+      if (e.error === 'aborted') return;
+      activeRef.current = false;
+      setListening(false);
+      setInterim('');
+    };
+
+    recog.onend = () => {
+      if (activeRef.current) {
+        try { recog.start(); } catch { /* ignore */ }
+      } else {
+        setListening(false);
+        setInterim('');
+      }
+    };
 
     recogRef.current = recog;
     recog.start();
+  }, []);
+
+  const start = useCallback(() => {
+    if (!supported || activeRef.current) return;
+    activeRef.current = true;
     setListening(true);
-  }, [supported, listening, onResult]);
+    setInterim('');
+    createAndStart();
+  }, [supported, createAndStart]);
 
   const stop = useCallback(() => {
-    recogRef.current?.stop();
+    activeRef.current = false;
     setListening(false);
     setInterim('');
+    try { recogRef.current?.stop(); } catch { /* ignore */ }
+    recogRef.current = null;
   }, []);
 
   const toggle = useCallback(() => {
-    if (listening) stop(); else start();
-  }, [listening, start, stop]);
+    if (activeRef.current) stop(); else start();
+  }, [start, stop]);
 
-  useEffect(() => () => recogRef.current?.stop(), []);
+  useEffect(() => () => {
+    activeRef.current = false;
+    try { recogRef.current?.stop(); } catch { /* ignore */ }
+  }, []);
 
   return { listening, interim, toggle, supported };
 }
