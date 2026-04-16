@@ -204,10 +204,10 @@ function TrendingCarousel({ issues, onSupport, onOpen, t }) {
         ref={containerRef}
         onMouseEnter={() => { pausedRef.current = true; }}
         onMouseLeave={() => { pausedRef.current = false; }}
-        style={{ overflow:'hidden', margin:'6px 0 10px' }}
+        style={{ overflow:'hidden', margin:'16px 0 12px' }}
       >
         {/* add vertical padding inside a non-clipping wrapper so scale has room */}
-        <div style={{ padding:'10px 0 16px' }}>
+        <div style={{ padding:'18px 0 20px' }}>
           <div style={{
             display:'flex',
             gap: CARD_GAP,
@@ -389,12 +389,9 @@ export default function CommunityFeed() {
       </div>
 
       {/* Trending */}
-      <div className="mb-6">
-        <div className="flex items-baseline gap-2">
-          <p className="text-[10px] font-black tracking-[0.22em] uppercase text-blue-500/70">{t('feed.pulse')}</p>
-          <span className="h-1 w-1 rounded-full bg-blue-500/40" />
-          <h2 className="text-xl font-black text-foreground leading-tight">{t('feed.trending')}</h2>
-        </div>
+      <div className="mb-7">
+        <p className="text-[10px] font-black tracking-[0.22em] uppercase text-blue-500/70 mb-0.5">{t('feed.pulse')}</p>
+        <h2 className="text-xl font-black text-foreground">{t('feed.trending')}</h2>
         <TrendingCarousel issues={trendingIssues} onSupport={toggleLike} onOpen={(issue) => navigateTo('issueDetail', issue)} t={t} />
       </div>
 
