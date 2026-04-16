@@ -345,3 +345,15 @@
 .ticker-track:hover {
   animation-play-state: paused;
 }
+
+/* Hide native scrollbar on mobile only */
+@media (max-width: 767px) {
+  html, body {
+    scrollbar-width: none;       /* Firefox */
+    -ms-overflow-style: none;    /* IE / Edge */
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;               /* Chrome / Safari / WebKit */
+  }
+}
