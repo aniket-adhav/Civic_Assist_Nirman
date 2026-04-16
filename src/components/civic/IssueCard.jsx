@@ -4,11 +4,18 @@ import { CATEGORIES } from '../../data/dummyIssues';
 import { useLanguage } from '../../context/LanguageContext';
 
 const statusColors = {
-  open:       { bg: 'bg-red-100 dark:bg-red-900/30',    text: 'text-red-600 dark:text-red-400',    label: 'Open' },
-  pending:    { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-600 dark:text-orange-400', label: 'Pending' },
-  inprogress: { bg: 'bg-amber-100 dark:bg-amber-900/30',  text: 'text-amber-600 dark:text-amber-400',   label: 'In Progress' },
-  resolved:   { bg: 'bg-green-100 dark:bg-green-900/30',  text: 'text-green-600 dark:text-green-400',   label: 'Resolved' },
+  open:       { dot: '#ef4444', solid: 'bg-red-500',    label: 'Open' },
+  pending:    { dot: '#f97316', solid: 'bg-orange-500', label: 'Pending' },
+  inprogress: { dot: '#f59e0b', solid: 'bg-amber-500',  label: 'In Progress' },
+  resolved:   { dot: '#22c55e', solid: 'bg-green-500',  label: 'Resolved' },
 };
+
+function getSeverityChip(likes) {
+  if (likes >= 150) return { label: 'Critical', color: '#ef4444' };
+  if (likes >= 80)  return { label: 'High',     color: '#f97316' };
+  if (likes >= 30)  return { label: 'Medium',   color: '#f59e0b' };
+  return                   { label: 'Low',      color: '#22c55e' };
+}
 
 export default function IssueCard({ issue, onComment, variant = 'default' }) {
   const { toggleLike, navigateTo, showNotification } = useApp();
@@ -17,6 +24,7 @@ export default function IssueCard({ issue, onComment, variant = 'default' }) {
   const [imageFailed, setImageFailed] = useState(false);
   const category = CATEGORIES.find(c => c.id === issue.category);
   const status = statusColors[issue.status] || statusColors.open;
+  const severity = getSeverityChip(issue.likes);
   const timeAgo = formatTimeAgo(issue.createdAt);
 
   const openDetails = () => navigateTo('issueDetail', issue);
@@ -67,8 +75,12 @@ export default function IssueCard({ issue, onComment, variant = 'default' }) {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold text-foreground">{issue.reporter.name}</p>
-                <p className="truncate text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground">
-                  {timeAgo} · {shortLocation(issue.location)}
+                <p className="flex items-center gap-1.5 truncate text-[10px] font-medium text-muted-foreground">
+                  <i className="fas fa-clock shrink-0 text-[8px]" />
+                  <span>{timeAgo}</span>
+                  <span className="text-border">·</span>
+                  <i className="fas fa-location-dot shrink-0 text-[8px]" />
+                  <span className="truncate">{shortLocation(issue.location)}</span>
                 </p>
               </div>
             </div>
@@ -116,8 +128,20 @@ export default function IssueCard({ issue, onComment, variant = 'default' }) {
                 {category ? categoryLabel(category.id) : t('issueCard.issue')}
               </span>
             </div>
+            {/* Severity chip — bottom left */}
+            <div className="absolute bottom-4 left-4">
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-md backdrop-blur"
+                style={{ background: severity.color }}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+                {severity.label}
+              </span>
+            </div>
+            {/* Status chip — bottom right */}
             <div className="absolute bottom-4 right-4">
-              <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] shadow-sm ${status.bg} ${status.text}`}>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-bold text-white shadow-md backdrop-blur">
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: status.dot }} />
                 {statusLabel(issue.status || 'open')}
               </span>
             </div>
