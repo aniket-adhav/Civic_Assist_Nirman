@@ -83,98 +83,459 @@ function LoginSkeleton() {
 
 function FeedSkeleton() {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="hidden md:block fixed left-0 top-0 h-screen w-[260px] border-r border-border bg-sidebar p-4">
-        <div className="mb-8 flex items-center gap-3">
-          <Shimmer className="h-11 w-11" />
-          <div className="space-y-2">
-            <Shimmer className="h-4 w-28" />
-            <Shimmer className="h-3 w-20" />
+    <div className="animate-pulse space-y-5">
+      {/* search + report row */}
+      <div className="flex gap-3">
+        <Shimmer className="h-12 flex-1" rounded="rounded-xl" />
+        <Shimmer className="h-12 w-36" rounded="rounded-xl" />
+      </div>
+      {/* trending header */}
+      <div className="space-y-1">
+        <Shimmer className="h-3 w-28" rounded="rounded-full" />
+        <Shimmer className="h-6 w-48" />
+      </div>
+      {/* trending carousel */}
+      <div className="flex gap-4 overflow-hidden pb-1">
+        {[0, 1, 2].map(i => (
+          <div key={i} className="w-[300px] shrink-0 overflow-hidden rounded-2xl border border-border bg-card">
+            <Shimmer className="h-44 w-full rounded-none" />
+            <div className="space-y-2 p-3">
+              <Shimmer className="h-4 w-2/3" />
+              <Shimmer className="h-3 w-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* filter pills */}
+      <div className="flex gap-2 overflow-hidden">
+        {[0, 1, 2, 3, 4, 5].map(i => (
+          <Shimmer key={i} className="h-9 w-24 shrink-0" rounded="rounded-full" />
+        ))}
+      </div>
+      {/* issue cards grid */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {[0, 1, 2, 3, 4, 5].map(i => (
+          <div key={i} className="overflow-hidden rounded-2xl border border-border bg-card">
+            <Shimmer className="h-48 w-full rounded-none" />
+            <div className="space-y-3 p-4">
+              <div className="flex gap-2">
+                <Shimmer className="h-5 w-16" rounded="rounded-full" />
+                <Shimmer className="h-5 w-20" rounded="rounded-full" />
+              </div>
+              <Shimmer className="h-4 w-5/6" />
+              <Shimmer className="h-3 w-full" />
+              <Shimmer className="h-3 w-2/3" />
+              <div className="flex gap-2 border-t border-border pt-3">
+                <Shimmer className="h-9 flex-1" />
+                <Shimmer className="h-9 flex-1" />
+                <Shimmer className="h-9 flex-1" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function IssueDetailSkeleton() {
+  return (
+    <div className="animate-pulse space-y-6">
+      {/* hero card */}
+      <div className="overflow-hidden rounded-3xl border border-border bg-card">
+        <div className="relative h-[360px] bg-secondary">
+          <Shimmer className="h-full w-full rounded-none" />
+          {/* back button placeholder */}
+          <div className="absolute left-4 top-4 h-10 w-10 rounded-full bg-black/20" />
+          {/* bottom overlay: badges + title */}
+          <div className="absolute bottom-5 left-5 right-5 space-y-3">
+            <div className="flex gap-2">
+              <Shimmer className="h-6 w-20 bg-white/20" rounded="rounded-full" />
+              <Shimmer className="h-6 w-24 bg-white/20" rounded="rounded-full" />
+            </div>
+            <Shimmer className="h-8 w-3/4 bg-white/25" />
+            <Shimmer className="h-4 w-1/2 bg-white/20" />
           </div>
         </div>
-        <div className="space-y-3">
-          {[0, 1, 2, 3, 4].map((item) => (
-            <div key={item} className="flex items-center gap-3 rounded-xl p-2">
-              <Shimmer className="h-9 w-9" rounded="rounded-xl" />
-              <Shimmer className="h-4 flex-1" />
+        {/* action buttons */}
+        <div className="flex gap-3 border-t border-border p-4">
+          <Shimmer className="h-11 flex-1" />
+          <Shimmer className="h-11 flex-1" />
+          <Shimmer className="h-11 flex-1" />
+        </div>
+      </div>
+
+      {/* description card */}
+      <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+        <Shimmer className="h-5 w-32" />
+        <Shimmer className="h-3 w-full" />
+        <Shimmer className="h-3 w-full" />
+        <Shimmer className="h-3 w-3/4" />
+        <Shimmer className="h-3 w-5/6" />
+      </div>
+
+      {/* reporter + meta row */}
+      <div className="rounded-2xl border border-border bg-card p-4 flex items-center gap-4">
+        <Shimmer className="h-11 w-11" rounded="rounded-full" />
+        <div className="flex-1 space-y-2">
+          <Shimmer className="h-4 w-28" />
+          <Shimmer className="h-3 w-20" />
+        </div>
+        <Shimmer className="h-6 w-20" rounded="rounded-full" />
+      </div>
+
+      {/* map placeholder */}
+      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+        <div className="p-4 pb-2">
+          <Shimmer className="h-5 w-24 mb-3" />
+        </div>
+        <Shimmer className="h-52 w-full rounded-none" />
+      </div>
+
+      {/* comments section */}
+      <div className="rounded-2xl border border-border bg-card p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <Shimmer className="h-5 w-28" />
+          <Shimmer className="h-4 w-16" />
+        </div>
+        {[0, 1, 2].map(i => (
+          <div key={i} className="flex gap-3">
+            <Shimmer className="h-9 w-9 shrink-0" rounded="rounded-full" />
+            <div className="flex-1 space-y-2">
+              <div className="flex gap-2">
+                <Shimmer className="h-3 w-24" />
+                <Shimmer className="h-3 w-14" />
+              </div>
+              <Shimmer className="h-3 w-full" />
+              <Shimmer className="h-3 w-3/4" />
+            </div>
+          </div>
+        ))}
+        {/* comment input */}
+        <div className="flex gap-2 border-t border-border pt-3">
+          <Shimmer className="h-10 flex-1" rounded="rounded-xl" />
+          <Shimmer className="h-10 w-16" rounded="rounded-xl" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MyReportsSkeleton() {
+  return (
+    <div className="animate-pulse max-w-2xl mx-auto space-y-5">
+      {/* header */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <Shimmer className="h-6 w-32" />
+          <Shimmer className="h-3 w-24" />
+        </div>
+        <Shimmer className="h-9 w-28" rounded="rounded-xl" />
+      </div>
+      {/* stat pills */}
+      <div className="grid grid-cols-4 gap-2">
+        {[0,1,2,3].map(i => (
+          <div key={i} className="rounded-xl border border-border bg-card p-3 space-y-1">
+            <Shimmer className="h-5 w-8" />
+            <Shimmer className="h-3 w-full" />
+          </div>
+        ))}
+      </div>
+      {/* filter tabs */}
+      <div className="flex gap-2">
+        {[0,1,2,3].map(i => <Shimmer key={i} className="h-8 w-20" rounded="rounded-xl" />)}
+      </div>
+      {/* report rows */}
+      <div className="space-y-3">
+        {[0,1,2,3,4].map(i => (
+          <div key={i} className="rounded-2xl border border-border bg-card p-4 flex gap-4">
+            <Shimmer className="w-16 h-16 shrink-0" rounded="rounded-xl" />
+            <div className="flex-1 space-y-2">
+              <div className="flex justify-between gap-2">
+                <Shimmer className="h-4 w-3/5" />
+                <Shimmer className="h-5 w-16" rounded="rounded-full" />
+              </div>
+              <Shimmer className="h-3 w-2/5" />
+              <div className="flex gap-3 pt-1">
+                <Shimmer className="h-3 w-12" />
+                <Shimmer className="h-3 w-10" />
+                <Shimmer className="h-3 w-14" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TrendingSkeleton() {
+  return (
+    <div className="animate-pulse space-y-6">
+      {/* header */}
+      <div className="space-y-1">
+        <Shimmer className="h-7 w-44" />
+        <Shimmer className="h-3 w-64" />
+      </div>
+      {/* stat bar */}
+      <div className="flex gap-3">
+        {[0,1,2,3].map(i => (
+          <div key={i} className="flex-1 rounded-2xl border border-border bg-card p-3 space-y-1">
+            <Shimmer className="h-6 w-12" />
+            <Shimmer className="h-3 w-full" />
+          </div>
+        ))}
+      </div>
+      {/* filter pills */}
+      <div className="flex gap-2 overflow-hidden">
+        {[0,1,2,3,4,5].map(i => <Shimmer key={i} className="h-9 w-24 shrink-0" rounded="rounded-full" />)}
+      </div>
+      {/* chart placeholder */}
+      <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+        <Shimmer className="h-5 w-40" />
+        <Shimmer className="h-48 w-full" rounded="rounded-xl" />
+      </div>
+      {/* issue grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[0,1,2,3].map(i => (
+          <div key={i} className="overflow-hidden rounded-2xl border border-border bg-card">
+            <Shimmer className="h-36 w-full rounded-none" />
+            <div className="p-4 space-y-2">
+              <div className="flex gap-2">
+                <Shimmer className="h-5 w-14" rounded="rounded-full" />
+                <Shimmer className="h-5 w-20" rounded="rounded-full" />
+              </div>
+              <Shimmer className="h-4 w-3/4" />
+              <Shimmer className="h-3 w-1/2" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function LeaderboardSkeleton() {
+  return (
+    <div className="animate-pulse space-y-6">
+      {/* header */}
+      <div className="space-y-1">
+        <Shimmer className="h-7 w-44" />
+        <Shimmer className="h-3 w-56" />
+      </div>
+      {/* stat cards */}
+      <div className="flex gap-3">
+        {[0,1,2].map(i => (
+          <div key={i} className="flex-1 rounded-2xl border border-border bg-card p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <Shimmer className="h-7 w-7" rounded="rounded-lg" />
+              <Shimmer className="h-3 w-16" />
+            </div>
+            <Shimmer className="h-7 w-20" />
+            <Shimmer className="h-3 w-full" />
+          </div>
+        ))}
+      </div>
+      {/* filter pills */}
+      <div className="flex gap-2 overflow-hidden">
+        {[0,1,2,3,4,5].map(i => <Shimmer key={i} className="h-9 w-24 shrink-0" rounded="rounded-full" />)}
+      </div>
+      {/* top 3 podium */}
+      <div className="grid grid-cols-3 gap-3">
+        {[0,1,2].map(i => (
+          <div key={i} className="rounded-2xl border border-border bg-card p-4 flex flex-col items-center gap-2">
+            <Shimmer className="h-8 w-8" rounded="rounded-full" />
+            <Shimmer className="h-12 w-12" rounded="rounded-full" />
+            <Shimmer className="h-4 w-20" />
+            <Shimmer className="h-3 w-16" />
+            <Shimmer className="h-5 w-14" rounded="rounded-full" />
+          </div>
+        ))}
+      </div>
+      {/* rank list */}
+      <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
+        {[0,1,2,3,4,5].map(i => (
+          <div key={i} className="flex items-center gap-4 p-4">
+            <Shimmer className="h-6 w-6" rounded="rounded-full" />
+            <Shimmer className="h-10 w-10" rounded="rounded-full" />
+            <div className="flex-1 space-y-1.5">
+              <Shimmer className="h-4 w-32" />
+              <Shimmer className="h-3 w-20" />
+            </div>
+            <div className="text-right space-y-1.5">
+              <Shimmer className="h-4 w-16" />
+              <Shimmer className="h-3 w-12" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HelplineSkeleton() {
+  return (
+    <div className="animate-pulse space-y-6">
+      {/* header */}
+      <div className="space-y-1">
+        <Shimmer className="h-7 w-40" />
+        <Shimmer className="h-3 w-56" />
+      </div>
+      {/* emergency 4-card grid */}
+      <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+        <Shimmer className="h-5 w-36" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[0,1,2,3].map(i => (
+            <div key={i} className="rounded-2xl border border-border p-4 flex flex-col items-center gap-2">
+              <Shimmer className="h-12 w-12" rounded="rounded-2xl" />
+              <Shimmer className="h-5 w-12" />
+              <Shimmer className="h-3 w-16" />
+              <Shimmer className="h-5 w-20" rounded="rounded-full" />
             </div>
           ))}
         </div>
       </div>
-
-      <main className="min-h-screen md:ml-[260px]">
-        <div className="md:hidden sticky top-0 h-14 border-b border-border bg-card/80 px-4 py-3">
-          <Shimmer className="h-7 w-40" />
+      {/* civic service sections */}
+      {[0,1,2,3,4].map(i => (
+        <div key={i} className="rounded-2xl border border-border bg-card overflow-hidden">
+          {/* section header */}
+          <div className="flex items-center gap-3 p-4 border-b border-border">
+            <Shimmer className="h-9 w-9" rounded="rounded-xl" />
+            <Shimmer className="h-5 w-32" />
+          </div>
+          {/* service rows */}
+          {[0,1].map(j => (
+            <div key={j} className="flex items-center gap-3 p-4 border-b border-border/50 last:border-0">
+              <div className="flex-1 space-y-1.5">
+                <Shimmer className="h-4 w-36" />
+                <Shimmer className="h-3 w-48" />
+              </div>
+              <Shimmer className="h-4 w-20" />
+              <Shimmer className="h-8 w-8" rounded="rounded-lg" />
+              <Shimmer className="h-9 w-16" rounded="rounded-xl" />
+            </div>
+          ))}
         </div>
-        <div className="relative p-4 md:p-8">
-          <Shimmer className="mb-6 h-12 w-full" rounded="rounded-xl" />
-          <div className="mb-8">
-            <Shimmer className="mb-2 h-3 w-36" />
-            <Shimmer className="mb-5 h-7 w-56" />
-            <div className="grid gap-4 lg:grid-cols-3">
-              {[0, 1, 2].map((item) => (
-                <div key={item} className="overflow-hidden rounded-2xl border border-border bg-card">
-                  <Shimmer className="h-44 w-full rounded-none" />
-                  <div className="space-y-3 p-4">
-                    <Shimmer className="h-4 w-2/3" />
-                    <Shimmer className="h-3 w-full" />
-                  </div>
-                </div>
-              ))}
+      ))}
+    </div>
+  );
+}
+
+function NotificationsSkeleton() {
+  return (
+    <div className="animate-pulse max-w-2xl mx-auto space-y-5">
+      {/* header */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <Shimmer className="h-6 w-36" />
+          <Shimmer className="h-3 w-24" />
+        </div>
+        <div className="flex gap-2">
+          <div className="flex overflow-hidden rounded-xl border border-border">
+            <Shimmer className="h-8 w-16 rounded-none" />
+            <Shimmer className="h-8 w-20 rounded-none" />
+          </div>
+          <Shimmer className="h-8 w-24" rounded="rounded-xl" />
+        </div>
+      </div>
+      {/* notification list */}
+      <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
+        {[
+          'bg-red-50 dark:bg-red-900/20',
+          'bg-blue-50 dark:bg-blue-900/20',
+          'bg-green-50 dark:bg-green-900/20',
+          'bg-orange-50 dark:bg-orange-900/20',
+          'bg-amber-50 dark:bg-amber-900/20',
+        ].map((bg, i) => (
+          <div key={i} className={`flex items-start gap-3 p-4 ${bg}`}>
+            <Shimmer className="h-10 w-10 shrink-0" rounded="rounded-full" />
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <Shimmer className="h-4 w-3/5" />
+                <Shimmer className="h-3 w-10" />
+              </div>
+              <Shimmer className="h-3 w-4/5" />
             </div>
           </div>
-          <div className="mb-6 flex gap-2 overflow-hidden">
-            {[0, 1, 2, 3, 4].map((item) => (
-              <Shimmer key={item} className="h-9 w-24 shrink-0" rounded="rounded-full" />
-            ))}
-          </div>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {[0, 1, 2, 3, 4, 5].map((item) => (
-              <div key={item} className="overflow-hidden rounded-2xl border border-border bg-card">
-                <Shimmer className="aspect-square w-full rounded-none" />
-                <div className="space-y-3 p-4">
-                  <Shimmer className="h-4 w-5/6" />
-                  <Shimmer className="h-3 w-full" />
-                  <Shimmer className="h-3 w-3/4" />
-                  <div className="flex gap-2 border-t border-border pt-3">
-                    <Shimmer className="h-9 flex-1" />
-                    <Shimmer className="h-9 flex-1" />
-                    <Shimmer className="h-9 flex-1" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <LoadingStatus label="Loading civic updates..." />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SettingsSkeleton() {
+  return (
+    <div className="animate-pulse max-w-2xl mx-auto space-y-5">
+      {/* profile card */}
+      <div className="rounded-2xl border border-border bg-card p-5 flex items-center gap-4">
+        <Shimmer className="h-16 w-16 shrink-0" rounded="rounded-full" />
+        <div className="flex-1 space-y-2">
+          <Shimmer className="h-5 w-36" />
+          <Shimmer className="h-3 w-28" />
+          <Shimmer className="h-3 w-20" />
         </div>
-      </main>
+        <Shimmer className="h-9 w-20" rounded="rounded-xl" />
+      </div>
+      {/* setting sections */}
+      {['Appearance', 'Privacy', 'Location', 'Account'].map((section, si) => (
+        <div key={si} className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="px-4 py-3 border-b border-border">
+            <Shimmer className="h-4 w-28" />
+          </div>
+          {[0,1,2].slice(0, si === 3 ? 2 : 3).map(i => (
+            <div key={i} className="flex items-center gap-4 p-4 border-b border-border/50 last:border-0">
+              <Shimmer className="h-9 w-9" rounded="rounded-xl" />
+              <div className="flex-1 space-y-1.5">
+                <Shimmer className="h-4 w-32" />
+                <Shimmer className="h-3 w-48" />
+              </div>
+              <Shimmer className="h-8 w-20" rounded="rounded-xl" />
+            </div>
+          ))}
+        </div>
+      ))}
+      {/* logout button */}
+      <Shimmer className="h-12 w-full" rounded="rounded-xl" />
     </div>
   );
 }
 
 function FormSkeleton() {
   return (
-    <div className="min-h-screen bg-background md:ml-[260px]">
-      <div className="relative p-4 md:p-8">
-        <Shimmer className="mb-3 h-8 w-64" />
-        <Shimmer className="mb-8 h-4 w-96 max-w-full" />
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <div className="space-y-5">
-              <Shimmer className="h-12 w-full" />
-              <Shimmer className="h-28 w-full" />
-              <Shimmer className="h-12 w-full" />
-              <Shimmer className="h-12 w-full" />
-              <Shimmer className="h-12 w-44" />
-            </div>
+    <div className="animate-pulse space-y-6">
+      {/* header */}
+      <div className="space-y-2">
+        <Shimmer className="h-8 w-64" />
+        <Shimmer className="h-4 w-80 max-w-full" />
+      </div>
+      <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        {/* form fields */}
+        <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+          <Shimmer className="h-12 w-full" rounded="rounded-xl" />
+          <Shimmer className="h-28 w-full" rounded="rounded-xl" />
+          <div className="grid grid-cols-2 gap-3">
+            <Shimmer className="h-12 w-full" rounded="rounded-xl" />
+            <Shimmer className="h-12 w-full" rounded="rounded-xl" />
           </div>
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <Shimmer className="mb-4 h-48 w-full" />
-            <Shimmer className="mb-2 h-4 w-3/4" />
-            <Shimmer className="h-3 w-full" />
+          <Shimmer className="h-12 w-full" rounded="rounded-xl" />
+          <div className="flex gap-3">
+            <Shimmer className="h-10 w-36" rounded="rounded-xl" />
+            <Shimmer className="h-10 w-28" rounded="rounded-xl" />
+          </div>
+          <Shimmer className="h-12 w-44" rounded="rounded-xl" />
+        </div>
+        {/* map + photo */}
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+            <Shimmer className="h-5 w-28" />
+            <Shimmer className="h-52 w-full" rounded="rounded-xl" />
+            <Shimmer className="h-4 w-3/4" />
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+            <Shimmer className="h-5 w-24" />
+            <Shimmer className="h-32 w-full border-2 border-dashed border-border" rounded="rounded-xl" />
           </div>
         </div>
-        <LoadingStatus label="Preparing form..." />
       </div>
     </div>
   );
@@ -208,7 +569,14 @@ function AdminSkeleton() {
 
 export default function AppSkeleton({ page = 'login' }) {
   if (page === 'adminLogin' || page === 'adminDashboard') return <AdminSkeleton />;
-  if (page === 'report' || page === 'settings') return <FormSkeleton />;
-  if (page === 'feed' || page === 'issueDetail' || page === 'myReports' || page === 'trending' || page === 'notifications') return <FeedSkeleton />;
+  if (page === 'report')         return <FormSkeleton />;
+  if (page === 'issueDetail')    return <IssueDetailSkeleton />;
+  if (page === 'myReports')      return <MyReportsSkeleton />;
+  if (page === 'trending')       return <TrendingSkeleton />;
+  if (page === 'leaderboard')    return <LeaderboardSkeleton />;
+  if (page === 'helpline')       return <HelplineSkeleton />;
+  if (page === 'notifications')  return <NotificationsSkeleton />;
+  if (page === 'settings')       return <SettingsSkeleton />;
+  if (page === 'feed')           return <FeedSkeleton />;
   return <LoginSkeleton />;
 }

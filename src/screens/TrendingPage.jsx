@@ -3,16 +3,49 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { useApp } from '../context/AppContext';
 import { CATEGORIES } from '../data/dummyIssues';
 
+function Shimmer({ className = '', rounded = 'rounded-2xl' }) {
+  return <div className={`skeleton-shimmer ${rounded} ${className}`} aria-hidden="true" />;
+}
+
 function TrendingSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
-      <div className="h-7 w-40 bg-secondary rounded" />
+    <div className="space-y-6">
+      {/* header */}
+      <div className="space-y-1">
+        <Shimmer className="h-7 w-44" />
+        <Shimmer className="h-3 w-64" />
+      </div>
+      {/* stat bar */}
+      <div className="flex gap-3">
+        {[0,1,2,3].map(i => (
+          <div key={i} className="flex-1 rounded-2xl border border-border bg-card p-3 space-y-1">
+            <Shimmer className="h-6 w-12" />
+            <Shimmer className="h-3 w-full" />
+          </div>
+        ))}
+      </div>
+      {/* filter pills */}
+      <div className="flex gap-2 overflow-hidden">
+        {[0,1,2,3,4,5].map(i => <Shimmer key={i} className="h-9 w-24 shrink-0" rounded="rounded-full" />)}
+      </div>
+      {/* chart placeholder */}
+      <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
+        <Shimmer className="h-5 w-40" />
+        <Shimmer className="h-48 w-full" rounded="rounded-xl" />
+      </div>
+      {/* issue grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[1,2,3,4].map(i => (
-          <div key={i} className="glass-card p-4 space-y-3">
-            <div className="h-36 bg-secondary rounded-xl" />
-            <div className="h-4 bg-secondary rounded w-3/4" />
-            <div className="h-3 bg-secondary rounded w-1/2" />
+        {[0,1,2,3].map(i => (
+          <div key={i} className="overflow-hidden rounded-2xl border border-border bg-card">
+            <Shimmer className="h-36 w-full rounded-none" />
+            <div className="p-4 space-y-2">
+              <div className="flex gap-2">
+                <Shimmer className="h-5 w-14" rounded="rounded-full" />
+                <Shimmer className="h-5 w-20" rounded="rounded-full" />
+              </div>
+              <Shimmer className="h-4 w-3/4" />
+              <Shimmer className="h-3 w-1/2" />
+            </div>
           </div>
         ))}
       </div>

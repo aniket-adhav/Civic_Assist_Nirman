@@ -2,29 +2,49 @@ import { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 
+function Shimmer({ className = '', rounded = 'rounded-2xl' }) {
+  return <div className={`skeleton-shimmer ${rounded} ${className}`} aria-hidden="true" />;
+}
+
 function MyReportsSkeleton() {
   return (
-    <div className="max-w-2xl mx-auto animate-pulse">
-      <div className="flex items-center justify-between mb-5">
+    <div className="max-w-2xl mx-auto space-y-5">
+      {/* header */}
+      <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <div className="h-6 w-28 bg-secondary rounded" />
-          <div className="h-3 w-20 bg-secondary rounded" />
+          <Shimmer className="h-6 w-32" />
+          <Shimmer className="h-3 w-24" />
         </div>
-        <div className="h-9 w-28 bg-secondary rounded-xl" />
+        <Shimmer className="h-9 w-28" rounded="rounded-xl" />
       </div>
-      <div className="flex gap-2 mb-4">
-        {[1,2,3,4].map(i => <div key={i} className="h-8 w-20 bg-card border border-border rounded-xl" />)}
+      {/* stat pills */}
+      <div className="grid grid-cols-4 gap-2">
+        {[0,1,2,3].map(i => (
+          <div key={i} className="rounded-xl border border-border bg-card p-3 space-y-1">
+            <Shimmer className="h-5 w-8" />
+            <Shimmer className="h-3 w-full" />
+          </div>
+        ))}
       </div>
+      {/* filter tabs */}
+      <div className="flex gap-2">
+        {[0,1,2,3].map(i => <Shimmer key={i} className="h-8 w-20" rounded="rounded-xl" />)}
+      </div>
+      {/* report rows */}
       <div className="space-y-3">
-        {[1,2,3,4].map(i => (
-          <div key={i} className="glass-card p-4 flex gap-4">
-            <div className="w-16 h-16 rounded-xl bg-secondary flex-shrink-0" />
+        {[0,1,2,3,4].map(i => (
+          <div key={i} className="rounded-2xl border border-border bg-card p-4 flex gap-4">
+            <Shimmer className="w-16 h-16 shrink-0" rounded="rounded-xl" />
             <div className="flex-1 space-y-2">
-              <div className="h-4 bg-secondary rounded w-3/4" />
-              <div className="h-3 bg-secondary rounded w-1/2" />
-              <div className="flex gap-3">
-                <div className="h-3 bg-secondary rounded w-8" />
-                <div className="h-3 bg-secondary rounded w-8" />
+              <div className="flex justify-between gap-2">
+                <Shimmer className="h-4 w-3/5" />
+                <Shimmer className="h-5 w-16" rounded="rounded-full" />
+              </div>
+              <Shimmer className="h-3 w-2/5" />
+              <div className="flex gap-3 pt-1">
+                <Shimmer className="h-3 w-12" />
+                <Shimmer className="h-3 w-10" />
+                <Shimmer className="h-3 w-14" />
               </div>
             </div>
           </div>
