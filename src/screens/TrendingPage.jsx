@@ -56,7 +56,7 @@ function TrendingSkeleton() {
 const getSeverity = (likes) => {
   if (likes >= 150) return { label: 'CRITICAL', bg: '#ef4444' };
   if (likes >= 80)  return { label: 'URGENT',   bg: '#10b981' };
-  return              { label: 'STANDARD',  bg: 'rgba(100,116,139,0.9)' };
+  return              { label: null,        bg: 'rgba(100,116,139,0.9)' };
 };
 
 const shortLoc = (loc) => loc.split(',').slice(0, 2).join(',');
@@ -131,14 +131,16 @@ function IssueCard({ issue, onSupport, onClick }) {
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-        <div className="absolute top-3 left-3">
-          <span
-            className="px-2.5 py-1 rounded-lg text-[10px] font-black tracking-[0.15em] uppercase text-white"
-            style={{ background: severity.bg, boxShadow: `0 2px 8px ${severity.bg}55` }}
-          >
-            {severity.label}
-          </span>
-        </div>
+        {severity.label && (
+          <div className="absolute top-3 left-3">
+            <span
+              className="px-2.5 py-1 rounded-lg text-[10px] font-black tracking-[0.15em] uppercase text-white"
+              style={{ background: severity.bg, boxShadow: `0 2px 8px ${severity.bg}55` }}
+            >
+              {severity.label}
+            </span>
+          </div>
+        )}
         <div className="absolute bottom-3 left-3 right-3">
           <h3 className="text-white font-bold text-sm leading-snug line-clamp-2 drop-shadow">{issue.title}</h3>
           <p className="text-white/65 text-xs mt-1 flex items-center gap-1">
@@ -236,7 +238,7 @@ export default function TrendingPage() {
   const topAreas = areaData.slice(0, 4);
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-5 animate-fadeIn">
 
       {/* Header */}
       <div>
@@ -253,8 +255,8 @@ export default function TrendingPage() {
       </div>
 
       {/* Auto-scroll strip */}
-      <div className="overflow-hidden -mx-4 px-4">
-        <div className="trending-scroll flex gap-5" style={{ width: 'max-content' }}>
+      <div className="overflow-hidden -mx-3 px-3">
+        <div className="trending-scroll flex gap-4" style={{ width: 'max-content' }}>
           {doubled.map((issue, idx) => (
             <IssueCard
               key={`${issue.id}-${idx}`}
@@ -441,12 +443,14 @@ export default function TrendingPage() {
                 </div>
 
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span
-                    className="hidden sm:block px-2 py-0.5 rounded-lg text-[9px] font-black tracking-widest uppercase text-white"
-                    style={{ background: severity.bg }}
-                  >
-                    {severity.label}
-                  </span>
+                  {severity.label && (
+                    <span
+                      className="hidden sm:block px-2 py-0.5 rounded-lg text-[9px] font-black tracking-widest uppercase text-white"
+                      style={{ background: severity.bg }}
+                    >
+                      {severity.label}
+                    </span>
+                  )}
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleLike(issue.id); }}
                     className="w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-90"

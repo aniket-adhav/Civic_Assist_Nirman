@@ -9,7 +9,7 @@ import { useState, useEffect, useRef } from 'react';
 const getSeverity = (likes) => {
   if (likes >= 150) return { label: 'CRITICAL', bg: '#ef4444' };
   if (likes >= 80)  return { label: 'URGENT',   bg: '#10b981' };
-  return              { label: 'STANDARD',  bg: '#64748b' };
+  return              { label: null,        bg: '#64748b' };
 };
 const shortLoc = (loc) => loc.split(',').slice(0, 2).join(',');
 const AVATAR_COLORS   = ['#3b82f6','#8b5cf6','#06b6d4','#f59e0b','#ec4899'];
@@ -60,12 +60,14 @@ function TrendingCard({ issue, isActive, onSupport, onClick, t, cardW = 300 }) {
         <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.08) 55%, transparent 100%)' }} />
 
         {/* badge */}
-        <span style={{
-          position:'absolute', top:10, left:10,
-          background: sev.bg, color:'#fff',
-          fontSize:9, fontWeight:900, letterSpacing:'0.14em', textTransform:'uppercase',
-          padding:'3px 9px', borderRadius:7,
-        }}>{sev.label}</span>
+        {sev.label && (
+          <span style={{
+            position:'absolute', top:10, left:10,
+            background: sev.bg, color:'#fff',
+            fontSize:9, fontWeight:900, letterSpacing:'0.14em', textTransform:'uppercase',
+            padding:'3px 9px', borderRadius:7,
+          }}>{sev.label}</span>
+        )}
 
         {/* title + location */}
         <div style={{ position:'absolute', bottom:10, left:12, right:12 }}>
