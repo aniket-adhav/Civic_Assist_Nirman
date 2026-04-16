@@ -325,7 +325,7 @@ export default function CommunityFeed() {
       if (userLocation) {
         pool = pool.filter(i => {
           if (!i.coordinates) return false;
-          return haversine(userLocation.lat, userLocation.lng, i.coordinates.lat, i.coordinates.lng) <= 50;
+          return haversine(userLocation.lat, userLocation.lng, i.coordinates.lat, i.coordinates.lng) <= 15;
         });
       }
       return pool;
