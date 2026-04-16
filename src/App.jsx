@@ -18,6 +18,7 @@ import IssueDetail from './screens/IssueDetail';
 import AppSidebar from './components/civic/AppSidebar';
 import Notification from './components/civic/Notification';
 import AppSkeleton from './components/civic/AppSkeleton';
+import ChatBot from './components/civic/ChatBot';
 
 function AppContent() {
   const { currentPage, notification } = useApp();
@@ -86,6 +87,7 @@ function AppContent() {
       </main>
 
       {notification && <Notification message={notification.message} type={notification.type} />}
+      <ChatBot />
     </div>
   );
 }
