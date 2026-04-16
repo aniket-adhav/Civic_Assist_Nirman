@@ -298,31 +298,45 @@ function haversine(lat1, lng1, lat2, lng2) {
 /* ─── page ─── */
 export default function CommunityFeed() {
   const {
-    getFilteredIssues, getTrendingIssues, toggleLike,
+    issues, getFilteredIssues, getTrendingIssues, toggleLike,
     activeFilter, setActiveFilter,
     navigateTo, searchQuery, setSearchQuery,
     loadingIssues,
   } = useApp();
   const { t, categoryLabel } = useLanguage();
   const [commentIssue, setCommentIssue] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);       // { lat, lng }
-  const [locStatus, setLocStatus] = useState('idle');           // idle | loading | granted | denied
+  const [userLocation, setUserLocation] = useState(null);
+  const [locStatus, setLocStatus] = useState('idle');
 
-  const rawIssues = getFilteredIssues();
   const trendingIssues = getTrendingIssues();
 
-  /* apply My Area filter on top of normal filter */
-  const filteredIssues = (activeFilter === 'myarea' && userLocation)
-    ? rawIssues.filter(i => {
-        if (!i.coordinates) return false;
-        return haversine(userLocation.lat, userLocation.lng, i.coordinates.lat, i.coordinates.lng) <= 15;
-      })
-    : rawIssues;
+  /* My Area: filter ALL issues by distance + search (skip category filter) */
+  const filteredIssues = (() => {
+    if (activeFilter === 'myarea') {
+      let pool = [...(issues || [])];
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        pool = pool.filter(i =>
+          i.title.toLowerCase().includes(q) ||
+          i.description?.toLowerCase().includes(q) ||
+          i.location?.toLowerCase().includes(q)
+        );
+      }
+      if (userLocation) {
+        pool = pool.filter(i => {
+          if (!i.coordinates) return false;
+          return haversine(userLocation.lat, userLocation.lng, i.coordinates.lat, i.coordinates.lng) <= 50;
+        });
+      }
+      return pool;
+    }
+    return getFilteredIssues();
+  })();
 
   /* handle My Area pill click */
   const handleMyArea = () => {
     setActiveFilter('myarea');
-    if (userLocation) return; // already have it
+    if (userLocation) return;
     if (!navigator.geolocation) { setLocStatus('denied'); return; }
     setLocStatus('loading');
     navigator.geolocation.getCurrentPosition(
@@ -331,7 +345,7 @@ export default function CommunityFeed() {
         setLocStatus('granted');
       },
       () => setLocStatus('denied'),
-      { timeout: 8000 }
+      { timeout: 10000, enableHighAccuracy: false }
     );
   };
 
@@ -339,7 +353,7 @@ export default function CommunityFeed() {
 
   const categoryFilters = CATEGORIES.map(c => ({ ...c, label: categoryLabel(c.id) }));
   const allFilters = [
-    { id: 'all', label: t('status.all'), icon: 'fa-fire' },
+    { id: 'all', label: 'All', icon: 'fa-fire' },
     { id: 'myarea', label: 'My Area', icon: 'fa-location-dot', special: true },
     ...categoryFilters,
   ];
