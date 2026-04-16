@@ -1,8 +1,109 @@
 import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useLanguage } from '../context/LanguageContext';
 import RotatingText from '../components/RotatingText';
 import { api } from '../lib/api';
+
+const MAP_DOTS = [
+  { x: 18, y: 30, color: '#f87171', ring: '#f87171', label: 'Road', delay: 0 },
+  { x: 35, y: 55, color: '#fbbf24', ring: '#fbbf24', label: 'Electric', delay: 0.4 },
+  { x: 52, y: 22, color: '#60a5fa', ring: '#60a5fa', label: 'Water', delay: 0.8 },
+  { x: 68, y: 65, color: '#34d399', ring: '#34d399', label: 'Resolved', delay: 1.2 },
+  { x: 80, y: 38, color: '#f87171', ring: '#f87171', label: 'Road', delay: 0.3 },
+  { x: 25, y: 72, color: '#60a5fa', ring: '#60a5fa', label: 'Water', delay: 0.9 },
+  { x: 60, y: 48, color: '#fbbf24', ring: '#fbbf24', label: 'Electric', delay: 0.6 },
+  { x: 88, y: 72, color: '#34d399', ring: '#34d399', label: 'Resolved', delay: 1.5 },
+  { x: 42, y: 82, color: '#f87171', ring: '#f87171', label: 'Road', delay: 0.2 },
+  { x: 74, y: 18, color: '#34d399', ring: '#34d399', label: 'Resolved', delay: 1.0 },
+];
+
+const STREET_H = [15, 32, 50, 68, 84];
+const STREET_V = [12, 26, 42, 58, 72, 86];
+
+function MiniCityMap() {
+  const [visible, setVisible] = useState([]);
+
+  useEffect(() => {
+    MAP_DOTS.forEach((_, i) => {
+      setTimeout(() => setVisible(v => [...v, i]), 300 + i * 180);
+    });
+  }, []);
+
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100px', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(96,165,250,0.15)' }}>
+      {/* City grid SVG */}
+      <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+        <rect width="100%" height="100%" fill="#0a1628" />
+        {STREET_H.map(y => (
+          <line key={y} x1="0" y1={`${y}%`} x2="100%" y2={`${y}%`} stroke="rgba(96,165,250,0.08)" strokeWidth="1" />
+        ))}
+        {STREET_V.map(x => (
+          <line key={x} x1={`${x}%`} y1="0" x2={`${x}%`} y2="100%" stroke="rgba(96,165,250,0.08)" strokeWidth="1" />
+        ))}
+        {/* Block fills */}
+        {STREET_H.slice(0, -1).map((y, i) =>
+          STREET_V.slice(0, -1).map((x, j) => (
+            <rect key={`${i}-${j}`} x={`${x + 0.5}%`} y={`${y + 0.5}%`}
+              width={`${(STREET_V[j + 1] || 100) - x - 1}%`}
+              height={`${(STREET_H[i + 1] || 100) - y - 1}%`}
+              fill={`rgba(255,255,255,${((i + j) % 3 === 0) ? '0.012' : '0.005'})`} />
+          ))
+        )}
+      </svg>
+
+      {/* Edge vignette */}
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, transparent 40%, rgba(10,22,40,0.85) 100%)', pointerEvents: 'none' }} />
+
+      {/* Dots */}
+      {MAP_DOTS.map((dot, i) => (
+        <AnimatePresence key={i}>
+          {visible.includes(i) && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+              style={{ position: 'absolute', left: `${dot.x}%`, top: `${dot.y}%`, transform: 'translate(-50%,-50%)' }}
+            >
+              {/* Ping ring */}
+              <motion.div
+                animate={{ scale: [1, 2.4], opacity: [0.6, 0] }}
+                transition={{ duration: 2, repeat: Infinity, delay: dot.delay, ease: 'easeOut' }}
+                style={{ position: 'absolute', inset: '-3px', borderRadius: '50%', border: `1.5px solid ${dot.color}`, pointerEvents: 'none' }}
+              />
+              {/* Core dot */}
+              <motion.div
+                animate={{ scale: [1, 1.15, 1] }}
+                transition={{ duration: 2.5, repeat: Infinity, delay: dot.delay }}
+                style={{ width: '7px', height: '7px', borderRadius: '50%', background: dot.color, boxShadow: `0 0 8px ${dot.color}99`, position: 'relative' }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      ))}
+
+      {/* LIVE badge */}
+      <div style={{ position: 'absolute', top: '7px', right: '9px', display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(0,0,0,0.45)', borderRadius: '20px', padding: '2px 8px 2px 6px', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <motion.div
+          animate={{ opacity: [1, 0.2, 1] }}
+          transition={{ duration: 1.2, repeat: Infinity }}
+          style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#22c55e' }}
+        />
+        <span style={{ fontSize: '0.55rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)', letterSpacing: '0.1em' }}>LIVE</span>
+      </div>
+
+      {/* Legend */}
+      <div style={{ position: 'absolute', bottom: '7px', left: '9px', display: 'flex', gap: '10px' }}>
+        {[['#f87171', 'Road'], ['#fbbf24', 'Electric'], ['#60a5fa', 'Water'], ['#34d399', 'Resolved']].map(([color, lbl]) => (
+          <div key={lbl} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: color }} />
+            <span style={{ fontSize: '0.5rem', color: 'rgba(255,255,255,0.45)', fontFamily: "'DM Sans', sans-serif", fontWeight: 500, letterSpacing: '0.04em' }}>{lbl}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function AnimatedHero() {
   return (
@@ -289,33 +390,8 @@ export default function LoginPage() {
               ))}
             </div>
 
-            {/* Stats */}
-            <div className="flex items-start gap-6 mt-3">
-              {[['5K+', 'Issues Resolved'], ['12K+', 'Active Citizens'], ['98%', 'Satisfaction'], ['48h', 'Avg Response']].map(([val, lbl]) => (
-                <div key={lbl}>
-                  <div style={{
-                    fontFamily: "'Bebas Neue', sans-serif",
-                    fontWeight: 400,
-                    fontSize: '1.75rem',
-                    letterSpacing: '0.04em',
-                    background: 'linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    lineHeight: 1,
-                  }}>{val}</div>
-                  <div style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: '0.6rem',
-                    fontWeight: 600,
-                    color: 'rgba(255,255,255,0.5)',
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    marginTop: '3px',
-                  }}>{lbl}</div>
-                </div>
-              ))}
-            </div>
+            {/* Live City Map */}
+            <MiniCityMap />
           </div>
 
           <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
