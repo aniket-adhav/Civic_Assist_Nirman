@@ -390,8 +390,33 @@ export default function LoginPage() {
               ))}
             </div>
 
-            {/* Live City Map */}
-            <MiniCityMap />
+            {/* Stats */}
+            <div className="flex items-start gap-6 mt-3">
+              {[['5K+', 'Issues Resolved'], ['12K+', 'Active Citizens'], ['98%', 'Satisfaction'], ['48h', 'Avg Response']].map(([val, lbl]) => (
+                <div key={lbl}>
+                  <div style={{
+                    fontFamily: "'Bebas Neue', sans-serif",
+                    fontWeight: 400,
+                    fontSize: '1.75rem',
+                    letterSpacing: '0.04em',
+                    background: 'linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    lineHeight: 1,
+                  }}>{val}</div>
+                  <div style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: '0.6rem',
+                    fontWeight: 600,
+                    color: 'rgba(255,255,255,0.5)',
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    marginTop: '3px',
+                  }}>{lbl}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
