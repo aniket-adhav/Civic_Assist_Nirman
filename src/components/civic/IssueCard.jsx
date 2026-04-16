@@ -128,16 +128,18 @@ export default function IssueCard({ issue, onComment, variant = 'default' }) {
                 {category ? categoryLabel(category.id) : t('issueCard.issue')}
               </span>
             </div>
-            {/* Severity chip — bottom left */}
-            <div className="absolute bottom-4 left-4">
-              <span
-                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-md backdrop-blur"
-                style={{ background: severity.color }}
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
-                {severity.label}
-              </span>
-            </div>
+            {/* Severity chip — bottom left (hidden when Low) */}
+            {severity.label !== 'Low' && (
+              <div className="absolute bottom-4 left-4">
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-md backdrop-blur"
+                  style={{ background: severity.color }}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-white/70" />
+                  {severity.label}
+                </span>
+              </div>
+            )}
             {/* Status chip — bottom right */}
             <div className="absolute bottom-4 right-4">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-bold text-white shadow-md backdrop-blur">
