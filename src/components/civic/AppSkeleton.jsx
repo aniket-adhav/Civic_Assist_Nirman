@@ -11,6 +11,64 @@ function LoadingStatus({ label }) {
   );
 }
 
+function SidebarSkeleton() {
+  return (
+    <aside className="fixed left-0 top-0 h-full z-30 w-[260px] bg-card border-r border-border flex flex-col">
+      {/* logo area */}
+      <div className="flex items-center gap-3 px-4 h-16 border-b border-border flex-shrink-0">
+        <Shimmer className="h-9 w-9 flex-shrink-0" rounded="rounded-xl" />
+        <Shimmer className="h-5 w-28" />
+        <Shimmer className="h-4 w-4 ml-auto" rounded="rounded-md" />
+      </div>
+      {/* nav items */}
+      <nav className="flex-1 py-4 px-3 space-y-1">
+        {[0, 1, 2, 3, 4, 5, 6].map(i => (
+          <div key={i} className={`flex items-center gap-3 px-3 py-2.5 rounded-xl ${i === 0 ? 'skeleton-shimmer' : ''}`}>
+            <Shimmer className={`h-5 w-5 flex-shrink-0 ${i === 0 ? 'bg-white/30' : ''}`} rounded="rounded-md" />
+            <Shimmer className={`h-4 w-24 ${i === 0 ? 'bg-white/30' : ''}`} rounded="rounded-md" />
+          </div>
+        ))}
+      </nav>
+      {/* bottom: dark mode + logout */}
+      <div className="p-3 border-t border-border space-y-1">
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl">
+          <Shimmer className="h-5 w-5 flex-shrink-0" rounded="rounded-md" />
+          <Shimmer className="h-4 w-20" rounded="rounded-md" />
+        </div>
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl">
+          <Shimmer className="h-5 w-5 flex-shrink-0" rounded="rounded-md" />
+          <Shimmer className="h-4 w-16" rounded="rounded-md" />
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function MobileTopBarSkeleton() {
+  return (
+    <div className="md:hidden sticky top-0 z-20 h-14 bg-card/80 backdrop-blur-lg border-b border-border flex items-center px-4 gap-3">
+      <Shimmer className="h-6 w-6" rounded="rounded-md" />
+      <Shimmer className="h-5 w-28" rounded="rounded-md" />
+    </div>
+  );
+}
+
+function UserPanelLayout({ children }) {
+  return (
+    <div className="min-h-screen bg-background animate-pulse">
+      <div className="hidden md:block">
+        <SidebarSkeleton />
+      </div>
+      <MobileTopBarSkeleton />
+      <main className="min-h-screen md:ml-[260px]">
+        <div className="p-4 md:p-8">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
+}
+
 function LoginSkeleton() {
   return (
     <div className="h-screen overflow-hidden bg-white">
@@ -81,18 +139,18 @@ function LoginSkeleton() {
   );
 }
 
-function FeedSkeleton() {
+function FeedPageSkeleton() {
   return (
-    <div className="animate-pulse space-y-5">
+    <div className="space-y-5">
       {/* search + report row */}
       <div className="flex gap-3">
-        <Shimmer className="h-12 flex-1" rounded="rounded-xl" />
-        <Shimmer className="h-12 w-36" rounded="rounded-xl" />
+        <Shimmer className="h-11 flex-1" rounded="rounded-xl" />
+        <Shimmer className="h-11 w-36" rounded="rounded-xl" />
       </div>
       {/* trending header */}
       <div className="space-y-1">
         <Shimmer className="h-3 w-28" rounded="rounded-full" />
-        <Shimmer className="h-6 w-48" />
+        <Shimmer className="h-6 w-44" />
       </div>
       {/* trending carousel */}
       <div className="flex gap-4 overflow-hidden pb-1">
@@ -102,13 +160,26 @@ function FeedSkeleton() {
             <div className="space-y-2 p-3">
               <Shimmer className="h-4 w-2/3" />
               <Shimmer className="h-3 w-full" />
+              <div className="flex items-center justify-between pt-1">
+                <div className="flex gap-1">
+                  {[0,1,2].map(j => <Shimmer key={j} className="h-5 w-5" rounded="rounded-full" />)}
+                  <Shimmer className="h-4 w-16 ml-1" rounded="rounded-full" />
+                </div>
+                <Shimmer className="h-8 w-24" rounded="rounded-xl" />
+              </div>
             </div>
           </div>
         ))}
       </div>
+      {/* dots */}
+      <div className="flex justify-center gap-1.5">
+        {[0,1,2,3,4,5,6].map(i => (
+          <Shimmer key={i} className={`h-1.5 ${i === 0 ? 'w-6' : 'w-1.5'}`} rounded="rounded-full" />
+        ))}
+      </div>
       {/* filter pills */}
       <div className="flex gap-2 overflow-hidden">
-        {[0, 1, 2, 3, 4, 5].map(i => (
+        {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
           <Shimmer key={i} className="h-9 w-24 shrink-0" rounded="rounded-full" />
         ))}
       </div>
@@ -118,17 +189,22 @@ function FeedSkeleton() {
           <div key={i} className="overflow-hidden rounded-2xl border border-border bg-card">
             <Shimmer className="h-48 w-full rounded-none" />
             <div className="space-y-3 p-4">
-              <div className="flex gap-2">
-                <Shimmer className="h-5 w-16" rounded="rounded-full" />
-                <Shimmer className="h-5 w-20" rounded="rounded-full" />
+              <div className="flex items-center gap-2">
+                <Shimmer className="h-6 w-6" rounded="rounded-full" />
+                <div className="space-y-1 flex-1">
+                  <Shimmer className="h-3 w-24" />
+                  <Shimmer className="h-2.5 w-32" />
+                </div>
+                <Shimmer className="h-5 w-5" rounded="rounded-md" />
               </div>
+              <Shimmer className="h-5 w-16" rounded="rounded-full" />
               <Shimmer className="h-4 w-5/6" />
-              <Shimmer className="h-3 w-full" />
+              <Shimmer className="h-3 w-3/4" />
               <Shimmer className="h-3 w-2/3" />
               <div className="flex gap-2 border-t border-border pt-3">
-                <Shimmer className="h-9 flex-1" />
-                <Shimmer className="h-9 flex-1" />
-                <Shimmer className="h-9 flex-1" />
+                <Shimmer className="h-9 flex-1" rounded="rounded-xl" />
+                <Shimmer className="h-9 flex-1" rounded="rounded-xl" />
+                <Shimmer className="h-9 flex-1" rounded="rounded-xl" />
               </div>
             </div>
           </div>
@@ -138,16 +214,14 @@ function FeedSkeleton() {
   );
 }
 
-function IssueDetailSkeleton() {
+function IssueDetailPageSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
+    <div className="space-y-6">
       {/* hero card */}
       <div className="overflow-hidden rounded-3xl border border-border bg-card">
         <div className="relative h-[360px] bg-secondary">
           <Shimmer className="h-full w-full rounded-none" />
-          {/* back button placeholder */}
           <div className="absolute left-4 top-4 h-10 w-10 rounded-full bg-black/20" />
-          {/* bottom overlay: badges + title */}
           <div className="absolute bottom-5 left-5 right-5 space-y-3">
             <div className="flex gap-2">
               <Shimmer className="h-6 w-20 bg-white/20" rounded="rounded-full" />
@@ -157,7 +231,6 @@ function IssueDetailSkeleton() {
             <Shimmer className="h-4 w-1/2 bg-white/20" />
           </div>
         </div>
-        {/* action buttons */}
         <div className="flex gap-3 border-t border-border p-4">
           <Shimmer className="h-11 flex-1" />
           <Shimmer className="h-11 flex-1" />
@@ -211,7 +284,6 @@ function IssueDetailSkeleton() {
             </div>
           </div>
         ))}
-        {/* comment input */}
         <div className="flex gap-2 border-t border-border pt-3">
           <Shimmer className="h-10 flex-1" rounded="rounded-xl" />
           <Shimmer className="h-10 w-16" rounded="rounded-xl" />
@@ -221,13 +293,13 @@ function IssueDetailSkeleton() {
   );
 }
 
-function MyReportsSkeleton() {
+function MyReportsPageSkeleton() {
   return (
-    <div className="animate-pulse max-w-2xl mx-auto space-y-5">
+    <div className="max-w-2xl mx-auto space-y-5">
       {/* header */}
       <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <Shimmer className="h-6 w-32" />
+          <Shimmer className="h-7 w-32" />
           <Shimmer className="h-3 w-24" />
         </div>
         <Shimmer className="h-9 w-28" rounded="rounded-xl" />
@@ -269,9 +341,9 @@ function MyReportsSkeleton() {
   );
 }
 
-function TrendingSkeleton() {
+function TrendingPageSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
+    <div className="space-y-6">
       {/* header */}
       <div className="space-y-1">
         <Shimmer className="h-7 w-44" />
@@ -315,9 +387,9 @@ function TrendingSkeleton() {
   );
 }
 
-function LeaderboardSkeleton() {
+function LeaderboardPageSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
+    <div className="space-y-6">
       {/* header */}
       <div className="space-y-1">
         <Shimmer className="h-7 w-44" />
@@ -373,9 +445,9 @@ function LeaderboardSkeleton() {
   );
 }
 
-function HelplineSkeleton() {
+function HelplinePageSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
+    <div className="space-y-6">
       {/* header */}
       <div className="space-y-1">
         <Shimmer className="h-7 w-40" />
@@ -398,12 +470,10 @@ function HelplineSkeleton() {
       {/* civic service sections */}
       {[0,1,2,3,4].map(i => (
         <div key={i} className="rounded-2xl border border-border bg-card overflow-hidden">
-          {/* section header */}
           <div className="flex items-center gap-3 p-4 border-b border-border">
             <Shimmer className="h-9 w-9" rounded="rounded-xl" />
             <Shimmer className="h-5 w-32" />
           </div>
-          {/* service rows */}
           {[0,1].map(j => (
             <div key={j} className="flex items-center gap-3 p-4 border-b border-border/50 last:border-0">
               <div className="flex-1 space-y-1.5">
@@ -421,9 +491,9 @@ function HelplineSkeleton() {
   );
 }
 
-function NotificationsSkeleton() {
+function NotificationsPageSkeleton() {
   return (
-    <div className="animate-pulse max-w-2xl mx-auto space-y-5">
+    <div className="max-w-2xl mx-auto space-y-5">
       {/* header */}
       <div className="flex items-center justify-between">
         <div className="space-y-2">
@@ -463,9 +533,9 @@ function NotificationsSkeleton() {
   );
 }
 
-function SettingsSkeleton() {
+function SettingsPageSkeleton() {
   return (
-    <div className="animate-pulse max-w-2xl mx-auto space-y-5">
+    <div className="max-w-2xl mx-auto space-y-5">
       {/* profile card */}
       <div className="rounded-2xl border border-border bg-card p-5 flex items-center gap-4">
         <Shimmer className="h-16 w-16 shrink-0" rounded="rounded-full" />
@@ -500,9 +570,9 @@ function SettingsSkeleton() {
   );
 }
 
-function FormSkeleton() {
+function FormPageSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
+    <div className="space-y-6">
       {/* header */}
       <div className="space-y-2">
         <Shimmer className="h-8 w-64" />
@@ -569,14 +639,25 @@ function AdminSkeleton() {
 
 export default function AppSkeleton({ page = 'login' }) {
   if (page === 'adminLogin' || page === 'adminDashboard') return <AdminSkeleton />;
-  if (page === 'report')         return <FormSkeleton />;
-  if (page === 'issueDetail')    return <IssueDetailSkeleton />;
-  if (page === 'myReports')      return <MyReportsSkeleton />;
-  if (page === 'trending')       return <TrendingSkeleton />;
-  if (page === 'leaderboard')    return <LeaderboardSkeleton />;
-  if (page === 'helpline')       return <HelplineSkeleton />;
-  if (page === 'notifications')  return <NotificationsSkeleton />;
-  if (page === 'settings')       return <SettingsSkeleton />;
-  if (page === 'feed')           return <FeedSkeleton />;
-  return <LoginSkeleton />;
+  if (page === 'login') return <LoginSkeleton />;
+
+  const pageSkeletons = {
+    feed:          <FeedPageSkeleton />,
+    report:        <FormPageSkeleton />,
+    issueDetail:   <IssueDetailPageSkeleton />,
+    myReports:     <MyReportsPageSkeleton />,
+    leaderboard:   <LeaderboardPageSkeleton />,
+    helplines:     <HelplinePageSkeleton />,
+    notifications: <NotificationsPageSkeleton />,
+    settings:      <SettingsPageSkeleton />,
+    trending:      <TrendingPageSkeleton />,
+  };
+
+  const content = pageSkeletons[page] ?? <FeedPageSkeleton />;
+
+  return (
+    <UserPanelLayout>
+      {content}
+    </UserPanelLayout>
+  );
 }
