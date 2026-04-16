@@ -46,7 +46,7 @@ const issueSchema = new mongoose.Schema({
     finalScore: { type: Number, default: null },
     authenticity: {
       type: String,
-      enum: ['real', 'fake', 'unknown'],
+      enum: ['real', 'fake', 'unknown', 'scanning'],
       default: 'unknown',
     },
     isSpam: { type: Boolean, default: false },
