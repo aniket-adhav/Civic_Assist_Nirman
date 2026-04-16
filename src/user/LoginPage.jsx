@@ -318,19 +318,13 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{
-              width: '6px', height: '6px', borderRadius: '50%',
-              background: '#22c55e',
-              boxShadow: '0 0 6px rgba(34,197,94,0.7)',
-              flexShrink: 0,
-            }} />
-            <span style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: '0.65rem',
-              color: 'rgba(255,255,255,0.38)',
-              letterSpacing: '0.06em',
-            }}>All systems operational · Reports processed in real time</span>
+          <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {[['fa-shield-halved', 'Secure'], ['fa-lock', 'Private'], ['fa-bolt', 'Fast']].map(([icon, label]) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <i className={`fas ${icon}`} style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.35)' }} />
+                <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.05em' }}>{label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
