@@ -286,6 +286,15 @@ function FeedSkeleton() {
   );
 }
 
+/* ─── haversine distance (km) ─── */
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
 /* ─── page ─── */
 export default function CommunityFeed() {
   const {
@@ -296,12 +305,44 @@ export default function CommunityFeed() {
   } = useApp();
   const { t, categoryLabel } = useLanguage();
   const [commentIssue, setCommentIssue] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);       // { lat, lng }
+  const [locStatus, setLocStatus] = useState('idle');           // idle | loading | granted | denied
 
-  const filteredIssues  = getFilteredIssues();
-  const trendingIssues  = getTrendingIssues();
+  const rawIssues = getFilteredIssues();
+  const trendingIssues = getTrendingIssues();
+
+  /* apply My Area filter on top of normal filter */
+  const filteredIssues = (activeFilter === 'myarea' && userLocation)
+    ? rawIssues.filter(i => {
+        if (!i.coordinates) return false;
+        return haversine(userLocation.lat, userLocation.lng, i.coordinates.lat, i.coordinates.lng) <= 15;
+      })
+    : rawIssues;
+
+  /* handle My Area pill click */
+  const handleMyArea = () => {
+    setActiveFilter('myarea');
+    if (userLocation) return; // already have it
+    if (!navigator.geolocation) { setLocStatus('denied'); return; }
+    setLocStatus('loading');
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocStatus('granted');
+      },
+      () => setLocStatus('denied'),
+      { timeout: 8000 }
+    );
+  };
 
   if (loadingIssues && filteredIssues.length === 0) return <FeedSkeleton />;
-  const allFilters      = [{ id:'all', label:t('status.all'), icon:'fa-fire' }, ...CATEGORIES.map(c => ({ ...c, label: categoryLabel(c.id) }))];
+
+  const categoryFilters = CATEGORIES.map(c => ({ ...c, label: categoryLabel(c.id) }));
+  const allFilters = [
+    { id: 'all', label: t('status.all'), icon: 'fa-fire' },
+    { id: 'myarea', label: 'My Area', icon: 'fa-location-dot', special: true },
+    ...categoryFilters,
+  ];
 
   return (
     <div className="animate-fadeIn">
@@ -338,32 +379,65 @@ export default function CommunityFeed() {
       {/* Category filters */}
       <div className="mb-5 overflow-x-auto scrollbar-none">
         <div className="flex gap-2 pb-1">
-          {allFilters.map(f => (
+          {allFilters.map(f => {
+            const isActive = activeFilter === f.id;
+            const isMyArea = f.id === 'myarea';
+            return (
             <button
               key={f.id}
-              onClick={() => setActiveFilter(f.id)}
+              onClick={isMyArea ? handleMyArea : () => setActiveFilter(f.id)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap border transition-all duration-200 ${
-                activeFilter === f.id
+                isActive
                   ? 'text-primary-foreground border-transparent shadow-md'
-                  : 'bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/30'
+                  : isMyArea
+                    ? 'bg-card border-emerald-500/40 text-emerald-500 hover:bg-emerald-500/10'
+                    : 'bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/30'
               }`}
-              style={activeFilter === f.id ? { background:'var(--gradient-primary)' } : {}}
+              style={isActive ? { background: isMyArea ? 'linear-gradient(135deg,#059669,#10b981)' : 'var(--gradient-primary)' } : {}}
             >
-              <i className={`fas ${f.icon}`} />
+              {isMyArea && locStatus === 'loading'
+                ? <i className="fas fa-spinner fa-spin text-xs" />
+                : <i className={`fas ${f.icon}`} />}
               {f.label}
+              {isMyArea && locStatus === 'granted' && userLocation && !isActive && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-0.5" />
+              )}
             </button>
-          ))}
+          );
+        })}
         </div>
       </div>
 
       {/* Issue grid */}
-      {filteredIssues.length === 0 ? (
+      {activeFilter === 'myarea' && locStatus === 'loading' ? (
         <div className="glass-card text-center py-16 px-6">
           <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-2xl text-muted-foreground mx-auto mb-4">
-            <i className="fas fa-search" />
+            <i className="fas fa-spinner fa-spin text-blue-500" />
           </div>
-          <h3 className="text-base font-bold text-foreground">{t('feed.noIssues')}</h3>
-          <p className="text-sm text-muted-foreground mt-1">{t('feed.tryFilter')}</p>
+          <h3 className="text-base font-bold text-foreground">Getting your location…</h3>
+          <p className="text-sm text-muted-foreground mt-1">Please allow location access in your browser</p>
+        </div>
+      ) : activeFilter === 'myarea' && locStatus === 'denied' ? (
+        <div className="glass-card text-center py-16 px-6">
+          <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-2xl mx-auto mb-4">
+            <i className="fas fa-location-slash text-red-400" />
+          </div>
+          <h3 className="text-base font-bold text-foreground">Location access denied</h3>
+          <p className="text-sm text-muted-foreground mt-1">Enable location in your browser settings and try again</p>
+        </div>
+      ) : filteredIssues.length === 0 ? (
+        <div className="glass-card text-center py-16 px-6">
+          <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-2xl text-muted-foreground mx-auto mb-4">
+            {activeFilter === 'myarea'
+              ? <i className="fas fa-map-location-dot text-emerald-400" />
+              : <i className="fas fa-search" />}
+          </div>
+          <h3 className="text-base font-bold text-foreground">
+            {activeFilter === 'myarea' ? 'No issues near you' : t('feed.noIssues')}
+          </h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            {activeFilter === 'myarea' ? 'Great news — no reported issues within 15 km of your location!' : t('feed.tryFilter')}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
