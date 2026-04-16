@@ -141,8 +141,8 @@ export default function ChatBot() {
         style={{
           position: 'fixed', bottom: '88px', right: '24px', zIndex: 1000,
           width: '52px', height: '52px', borderRadius: '50%', border: 'none', cursor: 'pointer',
-          background: 'linear-gradient(135deg, #0d9488 0%, #0891b2 100%)',
-          boxShadow: '0 4px 20px rgba(13,148,136,0.5)',
+          background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+          boxShadow: '0 4px 20px rgba(99,102,241,0.45)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
         aria-label="Open help chat"
@@ -188,7 +188,7 @@ export default function ChatBot() {
             {/* Header */}
             <div style={{
               padding: '13px 16px',
-              background: 'linear-gradient(135deg, #0f766e 0%, #0e7490 100%)',
+              background: 'linear-gradient(135deg, #4338ca 0%, #6366f1 100%)',
               display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0,
             }}>
               <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -217,7 +217,7 @@ export default function ChatBot() {
                     style={{ display: 'flex', justifyContent: msg.type === 'user' ? 'flex-end' : 'flex-start', gap: '7px', alignItems: 'flex-end' }}
                   >
                     {msg.type === 'bot' && (
-                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'linear-gradient(135deg, #0d9488, #0891b2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginBottom: '2px' }}>
+                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginBottom: '2px' }}>
                         <i className="fas fa-robot" style={{ color: '#fff', fontSize: '0.62rem' }} />
                       </div>
                     )}
@@ -226,7 +226,7 @@ export default function ChatBot() {
                       padding: '9px 13px',
                       borderRadius: msg.type === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                       background: msg.type === 'user'
-                        ? 'linear-gradient(135deg, #0d9488, #0891b2)'
+                        ? 'linear-gradient(135deg, #6366f1, #4f46e5)'
                         : 'hsl(var(--muted))',
                       color: msg.type === 'user' ? '#fff' : 'hsl(var(--foreground))',
                       fontSize: '0.77rem',
@@ -262,7 +262,7 @@ export default function ChatBot() {
                           textAlign: 'left', cursor: 'pointer',
                           transition: 'all 0.15s',
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(13,148,136,0.08)'; e.currentTarget.style.borderColor = '#0d9488'; e.currentTarget.style.color = '#0d9488'; }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.08)'; e.currentTarget.style.borderColor = '#6366f1'; e.currentTarget.style.color = '#6366f1'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'hsl(var(--background))'; e.currentTarget.style.borderColor = 'hsl(var(--border))'; e.currentTarget.style.color = 'hsl(var(--foreground))'; }}
                       >
                         {opt.label}
