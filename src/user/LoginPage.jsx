@@ -5,6 +5,63 @@ import { useLanguage } from '../context/LanguageContext';
 import RotatingText from '../components/RotatingText';
 import { api } from '../lib/api';
 
+const TICKER_ITEMS = [
+  { dot: '#f87171', text: 'Pothole on Brigade Road', status: 'Filed 4m ago', statusColor: 'rgba(248,113,113,0.85)' },
+  { dot: '#34d399', text: 'Water leak in Koramangala', status: 'Resolved', statusColor: 'rgba(52,211,153,0.85)' },
+  { dot: '#fbbf24', text: 'Street light out · MG Road', status: 'Under review', statusColor: 'rgba(251,191,36,0.85)' },
+  { dot: '#34d399', text: 'Garbage pile near City Mall', status: 'Resolved in 48h', statusColor: 'rgba(52,211,153,0.85)' },
+  { dot: '#f87171', text: 'Broken footpath · Indiranagar', status: 'Filed 12m ago', statusColor: 'rgba(248,113,113,0.85)' },
+  { dot: '#fbbf24', text: 'Park maintenance · Jayanagar', status: 'In progress', statusColor: 'rgba(251,191,36,0.85)' },
+  { dot: '#34d399', text: 'Open drain · HSR Layout', status: 'Resolved in 2 days', statusColor: 'rgba(52,211,153,0.85)' },
+  { dot: '#f87171', text: 'Power outage · Whitefield', status: 'Filed 1h ago', statusColor: 'rgba(248,113,113,0.85)' },
+];
+
+function LiveTicker() {
+  const doubled = [...TICKER_ITEMS, ...TICKER_ITEMS];
+  return (
+    <div style={{ width: '100%', marginTop: '4px' }}>
+      {/* Header row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '7px' }}>
+        <motion.div
+          animate={{ opacity: [1, 0.3, 1] }}
+          transition={{ duration: 1.4, repeat: Infinity }}
+          style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e', flexShrink: 0, boxShadow: '0 0 6px rgba(34,197,94,0.7)' }}
+        />
+        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', color: 'rgba(255,255,255,0.38)', textTransform: 'uppercase' }}>
+          Live Reports
+        </span>
+        <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(255,255,255,0.08), transparent)' }} />
+      </div>
+
+      {/* Ticker strip */}
+      <div style={{
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: '8px',
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        padding: '7px 0',
+        maskImage: 'linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)',
+        WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)',
+      }}>
+        <div className="ticker-track">
+          {doubled.map((item, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '7px', paddingRight: '32px', flexShrink: 0 }}>
+              <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: item.dot, flexShrink: 0, boxShadow: `0 0 5px ${item.dot}88` }} />
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.7rem', fontWeight: 500, color: 'rgba(255,255,255,0.65)', whiteSpace: 'nowrap' }}>
+                {item.text}
+              </span>
+              <span style={{ fontSize: '0.62rem', color: item.statusColor, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, whiteSpace: 'nowrap' }}>
+                · {item.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const MAP_DOTS = [
   { x: 18, y: 30, color: '#f87171', ring: '#f87171', label: 'Road', delay: 0 },
   { x: 35, y: 55, color: '#fbbf24', ring: '#fbbf24', label: 'Electric', delay: 0.4 },
@@ -390,33 +447,8 @@ export default function LoginPage() {
               ))}
             </div>
 
-            {/* Stats */}
-            <div className="flex items-start gap-6 mt-3">
-              {[['5K+', 'Issues Resolved'], ['12K+', 'Active Citizens'], ['98%', 'Satisfaction'], ['48h', 'Avg Response']].map(([val, lbl]) => (
-                <div key={lbl}>
-                  <div style={{
-                    fontFamily: "'Bebas Neue', sans-serif",
-                    fontWeight: 400,
-                    fontSize: '1.75rem',
-                    letterSpacing: '0.04em',
-                    background: 'linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    lineHeight: 1,
-                  }}>{val}</div>
-                  <div style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: '0.6rem',
-                    fontWeight: 600,
-                    color: 'rgba(255,255,255,0.5)',
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    marginTop: '3px',
-                  }}>{lbl}</div>
-                </div>
-              ))}
-            </div>
+            {/* Live Ticker */}
+            <LiveTicker />
           </div>
 
           <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
