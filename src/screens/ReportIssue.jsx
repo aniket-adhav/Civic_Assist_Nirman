@@ -1,9 +1,86 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useApp } from '../context/AppContext';
 import { CATEGORIES } from '../data/dummyIssues';
 import { useLanguage } from '../context/LanguageContext';
+
+function useSpeechInput(onResult) {
+  const [listening, setListening] = useState(false);
+  const [interim, setInterim] = useState('');
+  const recogRef = useRef(null);
+
+  const supported = typeof window !== 'undefined' &&
+    !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+
+  const start = useCallback(() => {
+    if (!supported || listening) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recog = new SR();
+    recog.lang = 'en-IN';
+    recog.continuous = true;
+    recog.interimResults = true;
+
+    recog.onresult = (e) => {
+      let finalText = '';
+      let interimText = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t;
+        else interimText += t;
+      }
+      if (finalText) { onResult(finalText); setInterim(''); }
+      else setInterim(interimText);
+    };
+
+    recog.onerror = () => { setListening(false); setInterim(''); };
+    recog.onend   = () => { setListening(false); setInterim(''); };
+
+    recogRef.current = recog;
+    recog.start();
+    setListening(true);
+  }, [supported, listening, onResult]);
+
+  const stop = useCallback(() => {
+    recogRef.current?.stop();
+    setListening(false);
+    setInterim('');
+  }, []);
+
+  const toggle = useCallback(() => {
+    if (listening) stop(); else start();
+  }, [listening, start, stop]);
+
+  useEffect(() => () => recogRef.current?.stop(), []);
+
+  return { listening, interim, toggle, supported };
+}
+
+function MicButton({ listening, onClick, supported, small = false }) {
+  if (!supported) return null;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={listening ? 'Stop recording' : 'Speak to fill this field'}
+      className={`flex-shrink-0 flex items-center justify-center rounded-xl border transition-all ${
+        small ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm'
+      } ${
+        listening
+          ? 'bg-red-500 border-red-400 text-white shadow-lg shadow-red-200'
+          : 'bg-secondary border-border text-muted-foreground hover:text-primary hover:border-primary/40'
+      }`}
+    >
+      {listening
+        ? <span className="relative flex items-center justify-center">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-300 opacity-60" />
+            <i className="fas fa-stop relative text-white" style={{ fontSize: '0.6rem' }} />
+          </span>
+        : <i className="fas fa-microphone" />
+      }
+    </button>
+  );
+}
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -82,6 +159,16 @@ export default function ReportIssue() {
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  const titleVoice = useSpeechInput(useCallback((text) => {
+    setForm(prev => ({ ...prev, title: (prev.title ? prev.title + ' ' : '') + text.trim() }));
+    setErrors(prev => ({ ...prev, title: '' }));
+  }, []));
+
+  const descVoice = useSpeechInput(useCallback((text) => {
+    setForm(prev => ({ ...prev, description: (prev.description ? prev.description + ' ' : '') + text.trim() }));
+    setErrors(prev => ({ ...prev, description: '' }));
+  }, []));
 
   const [locationMode, setLocationMode] = useState('type');
   const [mapCenter, setMapCenter] = useState([20.5937, 78.9629]);
@@ -225,18 +312,61 @@ export default function ReportIssue() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-2">{t('report.issueTitle')} <span className="text-destructive">*</span></label>
-          <input type="text" value={form.title} onChange={e => update('title', e.target.value)}
-            placeholder={t('report.issueTitlePlaceholder')}
-            className="w-full px-4 py-3 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
+          <label className="block text-sm font-semibold text-foreground mb-2">
+            {t('report.issueTitle')} <span className="text-destructive">*</span>
+          </label>
+          <div className="flex items-center gap-2">
+            <input type="text" value={titleVoice.listening && titleVoice.interim ? form.title + (form.title ? ' ' : '') + titleVoice.interim : form.title}
+              onChange={e => update('title', e.target.value)}
+              placeholder={titleVoice.listening ? '🎙️ Listening…' : t('report.issueTitlePlaceholder')}
+              className={`flex-1 px-4 py-3 rounded-xl bg-secondary border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all ${
+                titleVoice.listening ? 'border-red-400 ring-2 ring-red-200' : 'border-border'
+              }`}
+            />
+            <MicButton
+              listening={titleVoice.listening}
+              supported={titleVoice.supported}
+              onClick={() => { if (descVoice.listening) descVoice.toggle(); titleVoice.toggle(); }}
+            />
+          </div>
+          {titleVoice.listening && (
+            <p className="text-xs text-red-500 mt-1 flex items-center gap-1.5">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+              Recording… speak your issue title, tap stop when done
+            </p>
+          )}
           {errors.title && <p className="text-xs text-destructive mt-1">{errors.title}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-foreground mb-2">{t('report.description')} <span className="text-destructive">*</span></label>
-          <textarea value={form.description} onChange={e => update('description', e.target.value)}
-            placeholder={t('report.descriptionPlaceholder')} rows={4}
-            className="w-full px-4 py-3 rounded-xl bg-secondary border border-border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none" />
+          <label className="block text-sm font-semibold text-foreground mb-2">
+            {t('report.description')} <span className="text-destructive">*</span>
+          </label>
+          <div className="relative">
+            <textarea
+              value={descVoice.listening && descVoice.interim ? form.description + (form.description ? ' ' : '') + descVoice.interim : form.description}
+              onChange={e => update('description', e.target.value)}
+              placeholder={descVoice.listening ? '🎙️ Listening… describe the issue in detail' : t('report.descriptionPlaceholder')}
+              rows={4}
+              className={`w-full px-4 py-3 pb-12 rounded-xl bg-secondary border text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none ${
+                descVoice.listening ? 'border-red-400 ring-2 ring-red-200' : 'border-border'
+              }`}
+            />
+            <div className="absolute bottom-3 right-3 flex items-center gap-2">
+              {descVoice.listening && (
+                <span className="text-[10px] font-semibold text-red-500 flex items-center gap-1">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                  Recording
+                </span>
+              )}
+              <MicButton
+                listening={descVoice.listening}
+                supported={descVoice.supported}
+                onClick={() => { if (titleVoice.listening) titleVoice.toggle(); descVoice.toggle(); }}
+                small
+              />
+            </div>
+          </div>
           {errors.description && <p className="text-xs text-destructive mt-1">{errors.description}</p>}
         </div>
 
