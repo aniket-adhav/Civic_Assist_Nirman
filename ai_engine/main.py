@@ -35,15 +35,20 @@ def main():
             "is_suspicious": fake_score < 0.5
         }
 
-        print(json.dumps(result))
+        sys.stdout.write(json.dumps(result) + "\n")
+        sys.stdout.flush()
+
     except Exception as e:
-        print(json.dumps({
+        error_result = {
             "error": str(e),
             "text_score": 0.5,
             "image_score": 0.5,
             "fake_score": 0.5,
             "is_suspicious": False
-        }))
+        }
+        sys.stdout.write(json.dumps(error_result) + "\n")
+        sys.stdout.flush()
+        print(f"AI engine exception: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":

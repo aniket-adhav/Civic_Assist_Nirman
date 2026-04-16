@@ -54,11 +54,14 @@ async function downloadImageToTemp(imageUrl) {
   return writeTempImage(Buffer.from(arr), mimeType);
 }
 
+const AI_ENGINE_DIR = path.join(__dirname, '../../ai_engine');
+
 function runPython(inputPayload) {
   return new Promise((resolve, reject) => {
     const pythonBin = resolvePythonBin();
     const python = spawn(pythonBin, [SCRIPT_PATH, JSON.stringify(inputPayload)], {
       windowsHide: true,
+      cwd: AI_ENGINE_DIR,
     });
 
     let stdout = '';
@@ -70,12 +73,17 @@ function runPython(inputPayload) {
 
     python.on('close', () => {
       try {
-        const parsed = JSON.parse((stdout || '').trim());
+        const lines = (stdout || '').trim().split('\n');
+        const jsonLine = lines.reverse().find(l => l.trim().startsWith('{'));
+        if (!jsonLine) throw new Error('No JSON line found in output');
+        const parsed = JSON.parse(jsonLine.trim());
         if (parsed?.error) {
           console.warn('AI python returned error:', parsed.error);
         }
         resolve(parsed);
       } catch {
+        console.error('AI stdout:', stdout);
+        console.error('AI stderr:', stderr);
         reject(new Error(`Invalid AI response. stderr: ${stderr || 'none'}`));
       }
     });

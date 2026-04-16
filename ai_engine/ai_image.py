@@ -1,8 +1,8 @@
+import sys
 import clip
 import torch
 from PIL import Image
 
-# Load CLIP once at startup
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
 
@@ -17,7 +17,7 @@ CATEGORY_PROMPTS = {
     "Water": [
         "a photo of water pipe leaking",
         "a photo of sewage overflow on street",
-        "a photo of waterlogging",
+        "a photo of waterlogging on road",
         "a photo of broken water pipeline",
         "a photo of water supply problem",
     ],
@@ -31,9 +31,9 @@ CATEGORY_PROMPTS = {
     "Waste": [
         "a photo of garbage dump on street",
         "a photo of overflowing dustbin",
-        "a photo of waste and litter",
+        "a photo of waste and litter on ground",
         "a photo of garbage not collected",
-        "a photo of dirty littered area",
+        "a photo of dirty littered area with trash",
     ],
     "Other": [
         "a photo of civic infrastructure problem",
@@ -45,31 +45,32 @@ CATEGORY_PROMPTS = {
 NEGATIVE_PROMPTS = [
     "a selfie or personal photo",
     "a food photo",
-    "a nature or landscape photo",
+    "a nature landscape photo",
     "a random irrelevant image",
     "a fake or unrelated image",
     "a screenshot or meme",
+    "a traffic signal or traffic light",
+    "a vehicle or car photo",
+    "an indoor photo",
+    "a sky or cloud photo",
+    "a person or crowd photo",
+    "an animal photo",
+    "a building exterior photo",
+    "a map or diagram",
 ]
 
 
 def analyze_image(image_file, category="Other"):
     try:
-        # Open image
         image = Image.open(image_file).convert("RGB")
         image.load()
         image_input = preprocess(image).unsqueeze(0).to(device)
 
-        # Get prompts for category
-        positive_prompts = CATEGORY_PROMPTS.get(
-            category,
-            CATEGORY_PROMPTS["Other"]
-        )
+        positive_prompts = CATEGORY_PROMPTS.get(category, CATEGORY_PROMPTS["Other"])
         all_prompts = positive_prompts + NEGATIVE_PROMPTS
 
-        # Tokenize
         text_tokens = clip.tokenize(all_prompts).to(device)
 
-        # Run CLIP
         with torch.no_grad():
             image_features = model.encode_image(image_input)
             text_features = model.encode_text(text_tokens)
@@ -85,11 +86,10 @@ def analyze_image(image_file, category="Other"):
         positive_score = sum(scores[:n_positive]) / n_positive
         negative_score = sum(scores[n_positive:]) / len(NEGATIVE_PROMPTS)
 
-        # Higher score if image matches category
         final_score = positive_score / (positive_score + negative_score + 1e-6)
 
         return min(final_score, 1.0)
 
     except Exception as e:
-        print(f"Image analysis error: {e}")
+        print(f"Image analysis error: {e}", file=sys.stderr)
         return 0.3
