@@ -170,11 +170,11 @@ export default function MyReports() {
                   <span className="flex-1" />
                   <button
                     onClick={(e) => handleShare(issue, e)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-primary hover:text-primary/70 font-bold"
+                    className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center gap-1 text-primary hover:text-primary/70 font-bold active:scale-90"
                   >
-                    <i className="fas fa-share-nodes text-[10px]" />{t('myReports.share')}
+                    <i className="fas fa-share-nodes text-[10px]" /><span className="hidden sm:inline">{t('myReports.share')}</span>
                   </button>
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity text-primary">
+                  <span className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-primary">
                     <i className="fas fa-chevron-right text-[10px]" />
                   </span>
                 </div>

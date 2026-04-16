@@ -116,7 +116,7 @@ export default function IssueDetail() {
   return (
     <div className="animate-fadeIn space-y-6">
       <section className="animate-scaleIn overflow-hidden rounded-3xl border border-border bg-card shadow-lg">
-        <div className="relative h-[360px] overflow-hidden md:h-[430px]">
+        <div className="relative h-[220px] sm:h-[300px] overflow-hidden md:h-[430px]">
           {issue.image && !heroImageFailed ? (
             <img src={issue.image} alt={issue.title} className="h-full w-full object-cover" onError={() => setHeroImageFailed(true)} />
           ) : (
@@ -141,7 +141,7 @@ export default function IssueDetail() {
             </div>
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <h1 className="max-w-4xl text-3xl font-black leading-tight text-white drop-shadow-lg md:text-5xl">
+                <h1 className="max-w-4xl text-xl sm:text-3xl font-black leading-tight text-white drop-shadow-lg md:text-5xl">
                   {issue.title}
                 </h1>
                 <div className="mt-3 flex flex-wrap items-center gap-4 text-xs font-semibold text-white/80">

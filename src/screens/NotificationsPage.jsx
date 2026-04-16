@@ -98,18 +98,18 @@ export default function NotificationsPage() {
                 {!n.read && (
                   <button
                     onClick={(e) => { e.stopPropagation(); markRead(n.id); }}
-                    className="opacity-0 group-hover:opacity-100 w-7 h-7 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
+                    className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all active:scale-90"
                     title={t('notifications.markAsRead')}
                   >
-                    <i className="fas fa-check text-[10px]" />
+                    <i className="fas fa-check text-xs" />
                   </button>
                 )}
                 <button
                   onClick={(e) => deleteNotif(n.id, e)}
-                  className="opacity-0 group-hover:opacity-100 w-7 h-7 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:text-destructive transition-all"
+                  className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground hover:text-destructive transition-all active:scale-90"
                   title={t('notifications.dismiss')}
                 >
-                  <i className="fas fa-xmark text-[10px]" />
+                  <i className="fas fa-xmark text-xs" />
                 </button>
               </div>
             </div>

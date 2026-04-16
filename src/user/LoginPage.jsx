@@ -557,13 +557,13 @@ export default function LoginPage() {
                   {t('login.enterOtpFor')} <strong className="text-slate-700">+91 {phone}</strong>
                 </p>
               </div>
-              <div className="flex gap-2.5 justify-between mb-5">
+              <div className="flex gap-1.5 sm:gap-2.5 justify-between mb-5">
                 {otp.map((digit, i) => (
                   <input key={i} ref={el => otpRefs.current[i] = el}
                     type="text" inputMode="numeric" maxLength={1} value={digit}
                     onChange={e => handleOtpChange(i, e.target.value)}
                     onKeyDown={e => handleOtpKeyDown(i, e)}
-                    className={`w-12 h-14 border-2 rounded-2xl text-center text-xl font-black outline-none transition-all ${
+                    className={`flex-1 min-w-0 h-12 sm:h-14 border-2 rounded-xl sm:rounded-2xl text-center text-lg sm:text-xl font-black outline-none transition-all ${
                       digit ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-200 bg-slate-50 text-slate-900 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-50'
                     }`}
                   />

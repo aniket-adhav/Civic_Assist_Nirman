@@ -465,7 +465,10 @@ export default function AdminDashboard() {
             </h1>
             <div className="flex items-center gap-2 mt-0.5">
               <i className={`fas fa-location-dot text-[10px] text-blue-500`} />
-              <p className={`text-xs font-medium ${textMuted}`}>Brihanmumbai Municipal Corporation (BMC) · Mumbai Region</p>
+              <p className={`text-xs font-medium truncate max-w-[160px] sm:max-w-none ${textMuted}`}>
+                <span className="sm:hidden">BMC · Mumbai</span>
+                <span className="hidden sm:inline">Brihanmumbai Municipal Corporation (BMC) · Mumbai Region</span>
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -557,22 +560,25 @@ export default function AdminDashboard() {
           )}
         </main>
 
-        <nav className={`lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t px-2 py-2 shadow-lg transition-colors duration-300 ${dark ? 'bg-[#0f172a] border-slate-700' : 'bg-white border-slate-100'}`}>
-          <div className="flex items-center justify-around">
+        <nav className={`lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t shadow-xl transition-colors duration-300 ${dark ? 'bg-[#0f172a] border-slate-700' : 'bg-white border-slate-100'}`}>
+          <div className="flex items-stretch">
             {[
-              { id: 'dashboard', icon: 'fa-gauge', label: 'Dashboard' },
-              { id: 'complaints', icon: 'fa-clipboard-list', label: 'Complaints' },
-              { id: 'analysis', icon: 'fa-chart-line', label: 'Analysis' },
-              { id: 'admin', icon: 'fa-user-shield', label: 'Admin' },
-            ].map(item => (
-              <button key={item.id} onClick={() => setTab(item.id)}
-                className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-xl transition-all ${activeTab === item.id ? 'text-blue-500' : dark ? 'text-slate-500' : 'text-slate-400'}`}>
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${activeTab === item.id ? 'bg-blue-500/20' : ''}`}>
-                  <i className={`fas ${item.icon} text-sm`} />
-                </div>
-                <span className="text-[9px] font-bold tracking-wide">{item.label}</span>
-              </button>
-            ))}
+              { id: 'dashboard',  icon: 'fa-gauge',          label: 'Home' },
+              { id: 'complaints', icon: 'fa-clipboard-list', label: 'Cases' },
+              { id: 'analysis',   icon: 'fa-chart-line',     label: 'Analysis' },
+              { id: 'admin',      icon: 'fa-user-shield',    label: 'Officers' },
+              { id: 'settings',   icon: 'fa-gear',           label: 'Settings' },
+            ].map(item => {
+              const active = activeTab === item.id;
+              return (
+                <button key={item.id} onClick={() => setTab(item.id)}
+                  className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-0.5 relative transition-all active:scale-95 ${active ? 'text-blue-500' : dark ? 'text-slate-500' : 'text-slate-400'}`}>
+                  {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-blue-500" />}
+                  <i className={`fas ${item.icon} text-base`} />
+                  <span className="text-[9px] font-bold">{item.label}</span>
+                </button>
+              );
+            })}
           </div>
         </nav>
       </div>

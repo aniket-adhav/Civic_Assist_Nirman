@@ -53,6 +53,19 @@ function MobileTopBarSkeleton() {
   );
 }
 
+function MobileBottomNavSkeleton() {
+  return (
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-card border-t border-border flex items-stretch h-14">
+      {[0,1,2,3,4].map(i => (
+        <div key={i} className="flex-1 flex flex-col items-center justify-center gap-1 py-2">
+          <Shimmer className={`h-5 w-5 ${i === 0 ? '' : ''}`} rounded="rounded-md" />
+          <Shimmer className="h-2 w-8" rounded="rounded-sm" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function UserPanelLayout({ children }) {
   return (
     <div className="min-h-screen bg-background animate-pulse">
@@ -61,10 +74,11 @@ function UserPanelLayout({ children }) {
       </div>
       <MobileTopBarSkeleton />
       <main className="min-h-screen md:ml-[260px]">
-        <div className="p-4 md:p-8">
+        <div className="p-4 md:p-8 pb-24 md:pb-8">
           {children}
         </div>
       </main>
+      <MobileBottomNavSkeleton />
     </div>
   );
 }

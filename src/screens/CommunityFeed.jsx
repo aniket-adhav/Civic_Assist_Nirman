@@ -15,12 +15,10 @@ const shortLoc = (loc) => loc.split(',').slice(0, 2).join(',');
 const AVATAR_COLORS   = ['#3b82f6','#8b5cf6','#06b6d4','#f59e0b','#ec4899'];
 const AVATAR_INITIALS = ['R','P','A','K','S'];
 
-const CARD_W   = 300;   // card width in px
 const CARD_GAP = 14;    // gap between cards in px
-const STEP     = CARD_W + CARD_GAP;
 
 /* ─── single card ─── */
-function TrendingCard({ issue, isActive, onSupport, onClick, t }) {
+function TrendingCard({ issue, isActive, onSupport, onClick, t, cardW = 300 }) {
   const sev = getSeverity(issue.likes);
   const cat = CATEGORIES.find(c => c.id === issue.category);
   const extra = Math.max(0, issue.likes - 3);
@@ -36,7 +34,7 @@ function TrendingCard({ issue, isActive, onSupport, onClick, t }) {
     <div
       onClick={onClick}
       style={{
-        width: CARD_W,
+        width: cardW,
         flexShrink: 0,
         borderRadius: 18,
         overflow: 'hidden',
@@ -150,6 +148,10 @@ function TrendingCarousel({ issues, onSupport, onOpen, t }) {
 
   const dotIdx = ((rawIdx % N) + N) % N;   // always 0…N-1
 
+  // Responsive card width: max 300px but leave 40px breathing room on either side
+  const cardW = containerW > 0 ? Math.min(300, Math.max(240, containerW - 48)) : 300;
+  const STEP  = cardW + CARD_GAP;
+
   /* measure container */
   useEffect(() => {
     const el = containerRef.current;
@@ -190,7 +192,7 @@ function TrendingCarousel({ issues, onSupport, onOpen, t }) {
   }, []);
 
   /* centering via paddingLeft + translateX */
-  const pad = containerW > 0 ? Math.max(0, containerW / 2 - CARD_W / 2) : 0;
+  const pad = containerW > 0 ? Math.max(0, containerW / 2 - cardW / 2) : 0;
   const tx  = -(rawIdx * STEP);
 
   return (
@@ -220,6 +222,7 @@ function TrendingCarousel({ issues, onSupport, onOpen, t }) {
                 isActive={idx === rawIdx}
                 onSupport={onSupport}
                 t={t}
+                cardW={cardW}
                 onClick={() => idx === rawIdx ? onOpen(issue) : setRawIdx(idx)}
               />
             ))}
