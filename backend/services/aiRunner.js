@@ -16,8 +16,7 @@ function resolvePythonBin() {
   const candidates = [
     path.join(__dirname, '../../ai_engine/.venv/Scripts/python.exe'),
     path.join(__dirname, '../../ai_engine/.venv/bin/python'),
-    path.join(__dirname, '../../ai_service/.venv/Scripts/python.exe'),
-    path.join(__dirname, '../../ai_service/.venv/bin/python'),
+    path.join(__dirname, '../../.pythonlibs/bin/python'),
   ];
 
   const localVenv = candidates.find((candidate) => fs.existsSync(candidate));
